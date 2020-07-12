@@ -21,9 +21,18 @@
     <ClCompile Include="getopt.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="example.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="getopt.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dnsheader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="example.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
