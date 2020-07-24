@@ -2,7 +2,7 @@
  *  @brief     URL过滤器
  *  @details   URL过滤器相关实现
  *  @author    王海昱
- *  @version   0.0.1a
+ *  @version   0.0.1b
  *  @date      2020.07.24-2020.07.24
  */
 
@@ -20,6 +20,8 @@
 
 static FILE* LogFile;
 
+static int LogLevel = LOG_WARN;
+
 static bool Ready;
 
 int InitLog(const char FileName[])
@@ -32,6 +34,7 @@ int InitLog(const char FileName[])
 	}
 	if (LogFile)
 	{
+		fputs("Try to restart the log service.\n", stderr);
 		switch (fclose(LogFile))
 		{
 		case 0:
@@ -39,7 +42,10 @@ int InitLog(const char FileName[])
 			break;
 		case EOF:
 			fputs("Unable to close the LogFile!\n", stderr);
-			fputs("Using the last one instead.\n", stderr);
+			if (LogFile)
+			{
+				fputs("Using the last one instead.\n", stderr);
+			}
 			return 1;
 		default:
 			fputs("Unknown Error!\n", stderr);
@@ -55,6 +61,12 @@ int InitLog(const char FileName[])
 	return 0;
 }
 
+void SetLogLevel(const int DstLevel)
+{
+	LogLevel = DstLevel;
+	return;
+}
+
 static int LogNotReady(void)
 {
 	if (Ready)
@@ -63,7 +75,7 @@ static int LogNotReady(void)
 	}
 	if (InitLog(NULL))
 	{
-		fputs("Start log-service failed.\n", stderr);
+		fputs("Start the log service failed.\n", stderr);
 		return 1;
 	}
 	return 0;
@@ -90,6 +102,10 @@ static int lprefix(const int WLevel)
 
 int lprintf(const int WLevel, char const* const Format, ...)
 {
+	if (WLevel > LogLevel)
+	{
+		return 0;
+	}
 	va_list ArgList;
 	va_start(ArgList, Format);
 	if (LogNotReady())
@@ -105,6 +121,10 @@ int lprintf(const int WLevel, char const* const Format, ...)
 
 int lputs(const int WLevel, char const* const Buffer)
 {
+	if (WLevel > LogLevel)
+	{
+		return 0;
+	}
 	if (LogNotReady())
 	{
 		return EOF;

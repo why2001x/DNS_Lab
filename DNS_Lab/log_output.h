@@ -2,7 +2,7 @@
  *  @brief     日志服务
  *  @details   可将日志分级输出至屏幕或文件
  *  @author    王海昱
- *  @version   0.0.1a
+ *  @version   0.0.1b
  *  @date      2020.07.24-2020.07.24
  */
 
@@ -13,9 +13,6 @@
 extern "C"
 {
 #endif
-
-	/// 日志文件指针
-	// extern FILE *LogFile;
 
 	/**
 	 * @brief 日志服务初始化
@@ -32,7 +29,7 @@ extern "C"
 	 */
 	extern int InitLog(const char FileName[]);
 
-	/// 最严重级别
+/// 最严重级别
 #define LOG_CRNT (1) ///< 此类错误很少使用，输出此类错误后应立即结束相关进程
 /// 程序错误
 #define LOG_ERRN (LOG_CRNT << 1)
@@ -42,6 +39,15 @@ extern "C"
 #define LOG_INFO (LOG_WARN << 1)
 /// 程序调试信息
 #define LOG_DBUG (LOG_INFO << 1)
+/// 关闭日志
+#define LOG_OFF (0) ///< 虚拟日志等级，仅便于调整日志级别
+
+
+	/**
+	 * @brief 更改日志等级
+	 * @param DstLevel 目标日志等级
+	*/
+	extern void SetLogLevel(const int DstLevel);
 
 	/**
 	 * @brief 日志服务-格式化输出
@@ -71,7 +77,7 @@ extern "C"
 	 *
 	 * @param WLevel 错误级别
 	 * @param Buffer 输出字符串
-	 * @return 若正常输出，返回值为非负值，否则返回值为EOF
+	 * @return 若正常输出，返回值为正值，否则返回值为EOF
 	 */
 	extern int lputs(const int WLevel, char const* const  Buffer);
 
