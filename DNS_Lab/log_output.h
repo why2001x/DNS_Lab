@@ -4,6 +4,8 @@
  *  @author    王海昱
  *  @version   0.0.1b
  *  @date      2020.07.24-2020.07.24
+ * @warning    日志服务自身错误将仅输出至stderr
+ * @warning    宽字符未经测试
  */
 
 #ifndef _LOG_OUTPUT_H
@@ -21,7 +23,6 @@ extern "C"
 	 * 应至少进行一次初始化
 	 * 以获得预期的输出效果
 	 *
-	 * @warning 日志服务自身错误将仅输出至stderr
 	 * @warning 宽字符文件名未经测试，新建文件可能会导致文件路径存在乱码
 	 *
 	 * @param FileName 文件名，应包含路径
@@ -29,7 +30,7 @@ extern "C"
 	 */
 	extern int InitLog(const char FileName[]);
 
-/// 最严重级别
+	/// 最严重级别
 #define LOG_CRNT (1) ///< 此类错误很少使用，输出此类错误后应立即结束相关进程
 /// 程序错误
 #define LOG_ERRN (LOG_CRNT << 1)
@@ -56,7 +57,6 @@ extern "C"
 	 * 行首将被添加时间与错误级别提示
 	 * 使用方法与printf相近
 	 *
-	 * @warning 宽字符未经测试
 	 *
 	 * @param WLevel 错误级别
 	 * @param Format 格式化字符串
@@ -73,7 +73,6 @@ extern "C"
 	 * 行末将被添加换行符
 	 * 使用方法与puts相近
 	 *
-	 * @warning 宽字符未经测试
 	 *
 	 * @param WLevel 错误级别
 	 * @param Buffer 输出字符串
