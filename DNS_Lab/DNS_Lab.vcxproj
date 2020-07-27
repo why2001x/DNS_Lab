@@ -144,11 +144,14 @@
     <ClCompile Include="getopt.c" />
     <ClCompile Include="log_output.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="url_fliter.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dnsdef.h" />
     <ClInclude Include="dnsheader.h" />
     <ClInclude Include="getopt.h" />
     <ClInclude Include="log_output.h" />
+    <ClInclude Include="url_fliter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

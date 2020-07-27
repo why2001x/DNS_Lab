@@ -24,6 +24,9 @@
     <ClCompile Include="log_output.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="url_fliter.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="getopt.h">
@@ -33,6 +36,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="log_output.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dnsdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="url_fliter.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
