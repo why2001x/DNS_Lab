@@ -357,7 +357,7 @@ typedef struct HashTable RecordTable;
 RecordTable List;
 #else
 #define USE_BRUTE
-#define RecordTable struct BruteTable
+typedef struct BruteTable RecordTable;
 const int (*RecordTableAppend)(RecordTable* const, struct Record* const) = BruteTableAppend;
 const void (*RecordTableClear)(RecordTable* const) = BruteTableClear;
 const void (*RecordTableSort)(RecordTable* const) = BruteTableSort;
