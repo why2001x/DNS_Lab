@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="dnsdef.c" />
     <ClCompile Include="getopt.c" />
     <ClCompile Include="log_output.c" />
     <ClCompile Include="main.c" />
