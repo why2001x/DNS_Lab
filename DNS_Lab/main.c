@@ -5,12 +5,20 @@
 #include "getopt.h"
 
 //#define NO_LOG_SERVICE
+#include "dnsdef.h"
 #include "dnsheader.h"
 #include "log_output.h"
+#include "url_fliter.h"
 
 int main(int argc, char* argv[])
 {
-	lputs(LOG_ERRN, "Main: Test No Log!");
+	InitURLFliter("dnsrelay.txt");
+	uchar buf[10] = {255,255,255,255,255};
+	for (int cnt = 1; cnt <= 5; cnt++)
+	{
+		printf("%d: %d ", cnt, URLCheck((enum QueryType)A, "www.zhihu.com", buf));
+		printf("%d.%d.%d.%d\n", buf[3], buf[2], buf[1], buf[0]);
+	}
 	return 0;
 	printf("%lld\n", sizeof(struct header));
 	printf("%d\n", lprintf(LOG_WARN, "Test\n", 1234, ' ', 98.76));
