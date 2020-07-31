@@ -8,11 +8,11 @@
 #include "dnsdef.h"
 #include "dnsheader.h"
 #include "log_output.h"
-#include "url_fliter.h"
+#include "url_filter.h"
 
 int main(int argc, char* argv[])
 {
-	InitURLFliter("dnsrelay.txt");
+	InitURLFilter("dnsrelay.txt");
 	uchar buf[10] = {255,255,255,255,255};
 	for (int cnt = 1; cnt <= 5; cnt++)
 	{

@@ -17,7 +17,7 @@
 #include "string.h"
 
 #include "log_output.h"
-#include "url_fliter.h"
+#include "url_filter.h"
 
 #define BUFFER_SIZE 300 ///< 输入缓冲区长度限制
 
@@ -90,23 +90,23 @@ static int RecordFindCompU(void* KeyPtr, void* ParPtr)
 
 static int RecordNodeInit(struct Record* const Object, const uchar Type, const union RecordData Data, const char* const Domain)
 {
-	lputs(LOG_DBUG, "URLFliter: Initializing a RecordNode.");
+	lputs(LOG_DBUG, "URLFilter: Initializing a RecordNode.");
 	int Length = strlen(Domain);
 	char* Temp = (char*)malloc((size_t)Length + 1);
 	if (Temp == NULL)
 	{
-		lputs(LOG_ERRN, "URLFliter: Error while allocating memory for a new Domain!");
+		lputs(LOG_ERRN, "URLFilter: Error while allocating memory for a new Domain!");
 		return -1;
 	}
 	strcpy(Temp, Domain);
 	switch ((enum QueryType)Type)
 	{
 	case A:
-		lputs(LOG_DBUG, "URLFliter: Record A.");
+		lputs(LOG_DBUG, "URLFilter: Record A.");
 		Object->Data.IPv4 = Data.IPv4;
 		break;
 	default:
-		lprintf(LOG_WARN, "URLFliter: Unknown query type %d skipped.\n", Type);
+		lprintf(LOG_WARN, "URLFilter: Unknown query type %d skipped.\n", Type);
 		free(Temp);
 		return 1;
 	}
@@ -118,11 +118,11 @@ static int RecordNodeInit(struct Record* const Object, const uchar Type, const u
 
 static struct Record* RecordNode(const uchar Type, const union RecordData Data, const char* const Domain)
 {
-	lputs(LOG_DBUG, "URLFliter: Constructing new RecordNode.");
+	lputs(LOG_DBUG, "URLFilter: Constructing new RecordNode.");
 	struct Record* Node = malloc(sizeof(struct Record));
 	if (Node == NULL)
 	{
-		lputs(LOG_ERRN, "URLFliter: Error while allocating memory for a new Record!");
+		lputs(LOG_ERRN, "URLFilter: Error while allocating memory for a new Record!");
 		return NULL;
 	}
 	memset(Node, 0, sizeof(struct Record));
@@ -140,7 +140,7 @@ static void RecordNodeFree(struct Record* const Object)
 	{
 		return;
 	}
-	lputs(LOG_DBUG, "URLFliter: Releasing a RecordNode.");
+	lputs(LOG_DBUG, "URLFilter: Releasing a RecordNode.");
 	if (Object->Domain != NULL)
 	{
 		free(Object->Domain);
@@ -176,7 +176,7 @@ static void BruteTableClear(struct BruteTable* const Object)
 	{
 		return;
 	}
-	lputs(LOG_DBUG, "URLFliter: Cleaning a BruteTable.");
+	lputs(LOG_DBUG, "URLFilter: Cleaning a BruteTable.");
 	free(Object->Data);
 	Object->Data = Object->End = NULL;
 	Object->Size = 0;
@@ -189,7 +189,7 @@ static void BruteTableFree(struct BruteTable* const Object)
 	{
 		return;
 	}
-	lputs(LOG_DBUG, "URLFliter: Releasing a BruteTable.");
+	lputs(LOG_DBUG, "URLFilter: Releasing a BruteTable.");
 	for (int i = 0; i < Object->Size; i++)
 	{
 		RecordNodeFree(Object->Data[i]);
@@ -206,34 +206,34 @@ static int BruteTableAppend(struct BruteTable* const Object, struct Record* cons
 {
 	if (Object->Data + Object->Size == Object->End)
 	{
-		lputs(LOG_DBUG, "URLFliter: Expanding the BruteTable.");
+		lputs(LOG_DBUG, "URLFilter: Expanding the BruteTable.");
 		if (Object->Size >= MAX_SIZE)
 		{
-			lputs(LOG_WARN, "URLFliter: The number of rules more than the limit! Skipped.");
+			lputs(LOG_WARN, "URLFilter: The number of rules more than the limit! Skipped.");
 			return 1;
 		}
 		struct BruteTable Temp = { NULL, NULL, Object->Size + min(STEP_BT_MAX, max(STEP_BT_MIN, Object->Size)) };
 		Temp.Data = (struct Record**)malloc(Temp.Size * sizeof(struct Record*));
 		if (Temp.Data == NULL)
 		{
-			lputs(LOG_ERRN, "URLFliter: Error while allocating memory!");
+			lputs(LOG_ERRN, "URLFilter: Error while allocating memory!");
 			return -1;
 		}
 		memset(Temp.Data, 0, Temp.Size * sizeof(struct Record*));
 		Temp.End = Temp.Data + Object->Size;
 		if (Object->Data != NULL)
 		{
-			lputs(LOG_DBUG, "URLFliter: Copy the data on the older table.");
+			lputs(LOG_DBUG, "URLFilter: Copy the data on the older table.");
 			memcpy(Temp.Data, Object->Data, Object->Size * sizeof(struct Record*));
 			BruteTableClear(Object);
-			lputs(LOG_DBUG, "URLFliter: The older table was released.");
+			lputs(LOG_DBUG, "URLFilter: The older table was released.");
 		}
-		lputs(LOG_DBUG, "URLFliter: Change to the newer one.");
+		lputs(LOG_DBUG, "URLFilter: Change to the newer one.");
 		memcpy(Object, &Temp, sizeof(struct BruteTable));
 	}
 	*(Object->End) = Item;
 	Object->End++;
-	lputs(LOG_DBUG, "URLFliter: A Record add to the end of BruteTable.");
+	lputs(LOG_DBUG, "URLFilter: A Record add to the end of BruteTable.");
 	return 0;
 }
 #undef MAX_SIZE
@@ -242,14 +242,14 @@ static int BruteTableAppend(struct BruteTable* const Object, struct Record* cons
 
 static void BruteTableSort(struct BruteTable* const Object)
 {
-	lputs(LOG_DBUG, "URLFliter: Sorting the BruteTable.");
+	lputs(LOG_DBUG, "URLFilter: Sorting the BruteTable.");
 	qsort(Object->Data, Object->End - Object->Data, sizeof(struct Record*), RecordSortComp);
 	return;
 }
 
 static void BruteTableUnique(struct BruteTable* const Object)
 {
-	lputs(LOG_DBUG, "URLFliter: Making the BruteTable unique.");
+	lputs(LOG_DBUG, "URLFilter: Making the BruteTable unique.");
 	if (Object->Data == Object->End)
 	{
 		return;
@@ -367,38 +367,38 @@ RecordTable List;
 #endif
 
 
-int InitURLFliter(const char* const FileName)
+int InitURLFilter(const char* const FileName)
 {
-	lputs(LOG_WARN, "URLFliter: Initializing...");
+	lputs(LOG_WARN, "URLFilter: Initializing...");
 	FILE* RulesFile;
-	lputs(LOG_INFO, "URLFliter: Reading the rule file...");
+	lputs(LOG_INFO, "URLFilter: Reading the rule file...");
 	if ((RulesFile = fopen(FileName, "r")) == NULL)
 	{
-		lputs(LOG_ERRN, "URLFliter: Error while opening the specified file!");
-		lputs(LOG_ERRN, "URLFliter: Existing rules unchanged.");
-		lputs(LOG_ERRN, "URLFliter: Initializing Failed!");
+		lputs(LOG_ERRN, "URLFilter: Error while opening the specified file!");
+		lputs(LOG_ERRN, "URLFilter: Existing rules unchanged.");
+		lputs(LOG_ERRN, "URLFilter: Initializing Failed!");
 		return 1;
 	}
 	RecordTable Temp = { NULL, NULL, 0 };
-	lputs(LOG_INFO, "URLFliter: Constructing the new fliter...");
+	lputs(LOG_INFO, "URLFilter: Constructing the new filter...");
 	int Count = 0;
 	for (char Buffer[BUFFER_SIZE]; fgets(Buffer, BUFFER_SIZE, RulesFile); Count++)
 	{
 		char Domain[BUFFER_SIZE];
 		if (sscanf(Buffer, "%[#]", Domain))
 		{
-			lprintf(LOG_DBUG, "URLFliter: Explanatory note. [line: %d]\n", Count + 1);
+			lprintf(LOG_DBUG, "URLFilter: Explanatory note. [line: %d]\n", Count + 1);
 			continue;
 		}
 		int Part[4];
 		if (sscanf(Buffer, "%d.%d.%d.%d%s", &Part[3], &Part[2], &Part[1], &Part[0], Domain) != 5)
 		{
-			lprintf(LOG_WARN, "URLFliter: Invalid rule. [line: %d]\n", Count + 1);
+			lprintf(LOG_WARN, "URLFilter: Invalid rule. [line: %d]\n", Count + 1);
 			continue;
 		}
 		if ((Part[0] | Part[1] | Part[2] | Part[3]) > 255)
 		{
-			lprintf(LOG_WARN, "URLFliter: Invalid IP %d.%d.%d.%d. [line: %d]\n", Part[3], Part[2], Part[1], Part[0], Count + 1);
+			lprintf(LOG_WARN, "URLFilter: Invalid IP %d.%d.%d.%d. [line: %d]\n", Part[3], Part[2], Part[1], Part[0], Count + 1);
 			continue;
 		}
 		_strlwr(Domain);
@@ -408,10 +408,10 @@ int InitURLFliter(const char* const FileName)
 		struct Record* NewRec = RecordNode((enum QueryType)A, Data, Domain);
 		if (NewRec == NULL)
 		{
-			lputs(LOG_ERRN, "URLFliter: Cleaning the temporary fliter...");
+			lputs(LOG_ERRN, "URLFilter: Cleaning the temporary filter...");
 			RecordTableClear(&Temp);
-			lputs(LOG_ERRN, "URLFliter: Existing rules unchanged.");
-			lputs(LOG_ERRN, "URLFliter: Initializing Failed!");
+			lputs(LOG_ERRN, "URLFilter: Existing rules unchanged.");
+			lputs(LOG_ERRN, "URLFilter: Initializing Failed!");
 			return 1;
 		}
 		int Return = RecordTableAppend(&Temp, NewRec);
@@ -419,34 +419,34 @@ int InitURLFliter(const char* const FileName)
 		{
 			if (Return < 0)
 			{
-				lputs(LOG_ERRN, "URLFliter: Cleaning the temporary fliter...");
+				lputs(LOG_ERRN, "URLFilter: Cleaning the temporary filter...");
 				RecordTableClear(&Temp);
-				lputs(LOG_ERRN, "URLFliter: Existing rules unchanged.");
-				lputs(LOG_ERRN, "URLFliter: Initializing Failed!");
+				lputs(LOG_ERRN, "URLFilter: Existing rules unchanged.");
+				lputs(LOG_ERRN, "URLFilter: Initializing Failed!");
 				return 1;
 			}
-			lputs(LOG_WARN, "URLFliter: There're too many rules in the file.");
-			lputs(LOG_WARN, "URLFliter: The system may not work as expected.");
+			lputs(LOG_WARN, "URLFilter: There're too many rules in the file.");
+			lputs(LOG_WARN, "URLFilter: The system may not work as expected.");
 			break;
 		}
 	}
-	lprintf(LOG_INFO, "URLFliter: %d rules read from file.", Count);
+	lprintf(LOG_INFO, "URLFilter: %d rules read from file.", Count);
 	fclose(RulesFile);
-	lputs(LOG_INFO, "URLFliter: Rule file is closed.");
+	lputs(LOG_INFO, "URLFilter: Rule file is closed.");
 #ifdef USE_BRUTE
-	lputs(LOG_DBUG, "URLFliter: Using BruteTable for recording.");
+	lputs(LOG_DBUG, "URLFilter: Using BruteTable for recording.");
 	RecordTableSort(&Temp);
 	RecordTableUnique(&Temp);
 #endif
 	RecordTableClear(&List);
 	List = Temp;
-	lputs(LOG_WARN, "URLFliter: Initializing Succeded!");
+	lputs(LOG_WARN, "URLFilter: Initializing Succeded!");
 	return 0;
 }
 
 inline void URL2Domain(const char* const URLString, char* const Domain)
 {
-	lputs(LOG_DBUG, "URLFliter: Extracting the domain from URL.");
+	lputs(LOG_DBUG, "URLFilter: Extracting the domain from URL.");
 	char* Start = strstr(URLString, "://");
 	if (Start == NULL)
 	{
@@ -468,7 +468,7 @@ inline void URL2Domain(const char* const URLString, char* const Domain)
 
 int URLCheck(const int Type, const char* const URLString, void* const IP)
 {
-	lputs(LOG_INFO, "URLFliter: Accepted a URL query.");
+	lputs(LOG_INFO, "URLFilter: Accepted a URL query.");
 	struct Record Key;
 	Key.Type = Type;
 	switch ((enum QueryType)Key.Type)
@@ -482,13 +482,13 @@ int URLCheck(const int Type, const char* const URLString, void* const IP)
 		Key.Data.IPv4 = *(ipv4_t*)IP;
 		break;
 	default:
-		lprintf(LOG_WARN, "URLFliter: Unknown query type %d.\n", Type);
+		lprintf(LOG_WARN, "URLFilter: Unknown query type %d.\n", Type);
 		return 0;
 	}
 	Key.Domain = (char*)malloc(strlen(URLString) + 1);
 	if (Key.Domain == NULL)
 	{
-		lputs(LOG_ERRN, "URLFliter: Error while allocating memory!");
+		lputs(LOG_ERRN, "URLFilter: Error while allocating memory!");
 		return 0;
 	}
 	URL2Domain(URLString, Key.Domain);
@@ -497,13 +497,13 @@ int URLCheck(const int Type, const char* const URLString, void* const IP)
 	Key.Domain = NULL;
 	if (Result == NULL)
 	{
-		lputs(LOG_INFO, "URLFliter: Query not found.");
+		lputs(LOG_INFO, "URLFilter: Query not found.");
 		return 0;
 	}
-	lputs(LOG_INFO, "URLFliter: Query found.");
+	lputs(LOG_INFO, "URLFilter: Query found.");
 	if (IP == NULL)
 	{
-		lputs(LOG_INFO, "URLFliter: But asked for no result.");
+		lputs(LOG_INFO, "URLFilter: But asked for no result.");
 		return 1;
 	}
 	switch ((enum QueryType)Key.Type)

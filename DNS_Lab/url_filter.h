@@ -8,8 +8,8 @@
  *  @bug       仅支持A记录
  */
 
-#ifndef _URL_FLITER_H
-#define _URL_FLITER_H
+#ifndef _URL_FILTER_H
+#define _URL_FILTER_H
 
 #ifdef __cplusplus
 extern "C"
@@ -30,7 +30,7 @@ extern "C"
 	 * @param FileName 文件名，应包含路径
 	 * @return 若初始化正常完成，返回值为0，否则为其他数值
 	 */
-	extern int InitURLFliter(const char* const FileName);
+	extern int InitURLFilter(const char* const FileName);
 
 	/**
 	 * @brief URL检测
@@ -51,4 +51,4 @@ extern "C"
 }
 #endif
 
-#endif // _URL_FLITER_H
+#endif // _URL_FILTER_H
