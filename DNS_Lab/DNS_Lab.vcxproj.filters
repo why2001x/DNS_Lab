@@ -24,10 +24,16 @@
     <ClCompile Include="log_output.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="url_fliter.c">
+    <ClCompile Include="dnsdef.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="dnsdef.c">
+    <ClCompile Include="url_filter.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="brute_table.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="record.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,7 +50,19 @@
     <ClInclude Include="dnsdef.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="url_fliter.h">
+    <ClInclude Include="url_filter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="brute_table.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="record_table.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="record.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

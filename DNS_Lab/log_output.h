@@ -2,8 +2,8 @@
  *  @brief     日志服务
  *  @details   可将日志分级输出至屏幕或文件
  *  @author    王海昱
- *  @version   0.0.1c
- *  @date      2020.07.24-2020.07.28
+ *  @version   0.0.1d
+ *  @date      2020.07.24-2020.08.10
  *  @warning   日志服务自身错误将仅输出至stderr
  *  @warning   宽字符未经测试
  */

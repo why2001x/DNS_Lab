@@ -141,18 +141,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="brute_table.c" />
     <ClCompile Include="dnsdef.c" />
     <ClCompile Include="getopt.c" />
     <ClCompile Include="log_output.c" />
     <ClCompile Include="main.c" />
-    <ClCompile Include="url_fliter.c" />
+    <ClCompile Include="record.c" />
+    <ClCompile Include="url_filter.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="brute_table.h" />
     <ClInclude Include="dnsdef.h" />
     <ClInclude Include="dnsheader.h" />
     <ClInclude Include="getopt.h" />
     <ClInclude Include="log_output.h" />
-    <ClInclude Include="url_fliter.h" />
+    <ClInclude Include="record.h" />
+    <ClInclude Include="record_table.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="url_filter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
