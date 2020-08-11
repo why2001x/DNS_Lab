@@ -17,6 +17,13 @@
 #include "string.h"
 #include "time.h"
 
+#include "getopt.h"
+
+#if defined(_MSC_VER) or defined(_WIN32)
+#include "windows.h"
+#endif // _MSC_VER
+
+
 #ifndef NOP
 #define NOP
 #else

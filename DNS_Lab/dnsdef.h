@@ -13,6 +13,8 @@ extern "C"
 {
 #endif
 
+#include "dnsheader.h"
+
     /// 小端法表示IPv4
     typedef unsigned ipv4_t;
     extern int ipv4Comp(ipv4_t Lhs, ipv4_t Rhs);

@@ -49,7 +49,7 @@ extern "C" {
 		unsigned char TC : 1;
 		unsigned char RD : 1;
 		unsigned char RA : 1;
-		unsigned char Z : 3;
+		unsigned char NOP : 3;
 		unsigned char RCODE : 4;
 		unsigned short QDCOUNT;
 		unsigned short ANCOUNT;

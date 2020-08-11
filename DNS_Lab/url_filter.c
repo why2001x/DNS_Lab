@@ -84,9 +84,6 @@ int InitURLFilter(const char* const FileName)
     lprintf(LOG_INFO, "URLFilter: %d rules read from file.", Count);
     fclose(RulesFile);
     lputs(LOG_INFO, "URLFilter: Rule file is closed.");
-#ifdef USE_BRUTE
-    lputs(LOG_DBUG, "URLFilter: Using BruteTable for recording.");
-#endif
     RecordTableClear(&List);
     List = Temp;
     lputs(LOG_WARN, "URLFilter: Initializing Succeded!");
@@ -165,7 +162,3 @@ int URLCheck(const int Type, const char* const URLString, void* const IP)
     }
     return 1;
 }
-
-#ifdef USE_BRUTE
-#undef USE_BRUTE
-#endif

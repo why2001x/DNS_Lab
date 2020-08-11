@@ -34,7 +34,7 @@ extern "C"
     const void (*RecordTableClear)(RecordTable* const) = HashTableClear;
     const struct Record* const(*RecordCheck)(RecordTable* const, struct Record* const) = HashTableCheck;
 #ifdef _DEBUG
-    const void (*RecordTablePrint)(struct BruteTable* const Object) = BruteTablePrint;
+    const void (*RecordTablePrint)(struct RecordTable* const Object) = HashTablePrint;
 #endif
 
 #else
@@ -42,12 +42,14 @@ extern "C"
 #define USE_BRUTE
 
 #include "brute_table.h"
+    /// @brief   记录表
+    /// @warning 请使用相关函数进行访问
     typedef struct BruteTable RecordTable;
     const int (*RecordTableAppend)(RecordTable* const, struct Record* const) = BruteTableAppend;
     const void (*RecordTableClear)(RecordTable* const) = BruteTableClear;
     const struct Record* const(*RecordCheck)(RecordTable* const, struct Record* const) = BruteTableCheck;
 #ifdef _DEBUG
-    const void (*RecordTablePrint)(struct BruteTable* const Object)= BruteTablePrint;
+    const void (*RecordTablePrint)(struct RecordTable* const Object) = BruteTablePrint;
 #endif
 
 #endif
