@@ -48,14 +48,6 @@ extern "C"
     int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item);
 
     /**
-     * @brief 清除记录表
-     * @param Object 目标基本记录表指针
-     * @warning 仅清除记录表，不清除记录内容
-     * @see BruteTableFree
-     */
-    void BruteTableClear(struct BruteTable* const Object);
-
-    /**
      * @brief 查询记录
      * @details 查询结果将尽可能不同于参考记录
      * @param Object 目标基本记录表指针
@@ -66,17 +58,16 @@ extern "C"
     struct Record* const BruteTableCheck(struct BruteTable* const Object, struct Record* const Key);
 
     /**
-     * @brief 释放记录表
+     * @brief 清除记录
      * @param Object 目标基本记录表指针
-     * @warning 清除记录表及表内记录内容
-     * @see BruteTableClear
+     * @warning 清除记录表内记录内容
      */
-    void BruteTableFree(struct BruteTable* const Object);
+    void BruteTableClear(struct BruteTable* const Object);
 
 #ifdef _DEBUG
 
     /**
-     * @brief 记录表可视化输出至stdout
+     * @brief 记录表输出至stdout
      * @param Object 目标基本记录表指针
      */
     void BruteTablePrint(struct BruteTable* const Object);

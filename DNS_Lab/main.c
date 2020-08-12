@@ -1,4 +1,8 @@
-﻿#include "stdafx.h"
+﻿/**
+ * @file  main.c
+ * @brief 主程序
+ */
+#include "stdafx.h"
 
 #include "dnsdef.h"
 #include "dnsheader.h"
@@ -7,7 +11,19 @@
 
 int main(int argc, char* argv[])
 {
-	InitURLFilter("dnsrelay.txt");
+	srand(time(NULL));
+	int ec = 0;
+	for (int i = 0; i < (int)1e2; i++)
+	{
+		if (InitURLFilter("dnsrelay.txt"))
+		{
+			if (++ec % 10 == 0)
+			{
+				printf(" EC: %d\r",ec);
+			}
+		}URLCheck((enum QueryType)A, "www.zhihu.com", NULL);
+	}
+	puts("");
 	uchar buf[10] = { 255,255,255,255,255 };
 	for (int cnt = 1; cnt <= 5; cnt++)
 	{
@@ -23,3 +39,21 @@ int main(int argc, char* argv[])
 	printf("%d\n", lputs(LOG_WARN, "Hello World!"));
 	return 0;
 }
+
+/**
+ * @mainpage 《计算机网络》课程设计 文档
+ *
+ * @section 成员信息
+ *
+ * 北京邮电大学 计算机学院 2018级
+ * - 方淇   学号：2018211356
+ * - 王海昱 学号：2018211358
+ * - 何志臻 学号：2018211364
+ *
+ * @section 实验环境
+ *
+ * Windows10(x86_64) + VS2019
+ *
+ * @section 实验概况
+ * 
+ */

@@ -4,7 +4,7 @@
 #include "record_table.h"
 #include "url_filter.h"
 
-RecordTable List;
+static RecordTable List;
 
 int InitURLFilter(const char* const FileName)
 {
@@ -18,7 +18,7 @@ int InitURLFilter(const char* const FileName)
         lputs(LOG_ERRN, "URLFilter: Initializing Failed!");
         return 1;
     }
-    RecordTable Temp = { false, NULL, NULL, 0 };
+    RecordTable Temp = { NULL };
     lputs(LOG_INFO, "URLFilter: Constructing the new filter...");
     int Count = 0;
     for (char Buffer[BUFFER_SIZE]; fgets(Buffer, BUFFER_SIZE, RulesFile); Count++)
@@ -47,8 +47,10 @@ int InitURLFilter(const char* const FileName)
         struct Record* NewRec = RecordNode((enum QueryType)A, Data, Domain);
         if (NewRec == NULL)
         {
-            lputs(LOG_ERRN, "URLFilter: Cleaning the temporary filter...");
+            lputs(LOG_ERRN, "URLFilter: Releasing the temporary filter...");
             RecordTableClear(&Temp);
+            fclose(RulesFile);
+            lputs(LOG_INFO, "URLFilter: Rule file is closed.");
             lputs(LOG_ERRN, "URLFilter: Existing rules unchanged.");
             lputs(LOG_ERRN, "URLFilter: Initializing Failed!");
             return 1;
@@ -58,8 +60,10 @@ int InitURLFilter(const char* const FileName)
         {
             if (Return < 0)
             {
-                lputs(LOG_ERRN, "URLFilter: Cleaning the temporary filter...");
+                lputs(LOG_ERRN, "URLFilter: Releasing the temporary filter...");
                 RecordTableClear(&Temp);
+                fclose(RulesFile);
+                lputs(LOG_INFO, "URLFilter: Rule file is closed.");
                 lputs(LOG_ERRN, "URLFilter: Existing rules unchanged.");
                 lputs(LOG_ERRN, "URLFilter: Initializing Failed!");
                 return 1;
@@ -72,7 +76,7 @@ int InitURLFilter(const char* const FileName)
     lprintf(LOG_INFO, "URLFilter: %d rules read from file.", Count);
     fclose(RulesFile);
     lputs(LOG_INFO, "URLFilter: Rule file is closed.");
-    RecordTableFree(&List);
+    RecordTableClear(&List);
     List = Temp;
     lputs(LOG_WARN, "URLFilter: Initializing Succeded!");
     return 0;

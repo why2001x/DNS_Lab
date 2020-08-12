@@ -1,5 +1,4 @@
 ﻿/**
- * @file      record.h
  * @brief     记录格式
  * @author    王海昱
  * @version   0.0.1a
@@ -15,6 +14,12 @@ extern "C"
 {
 #endif
 #include "dnsdef.h"
+
+    /**
+     * @ingroup RecordTable
+     * @defgroup Record
+     * @{
+     */
 
     /// 记录内数据类型
     union RecordData
@@ -81,6 +86,8 @@ extern "C"
      * @param Object 目标记录指针
      */
     void RecordNodeFree(struct Record* const Object);
+
+    /**@}*/
 
 #ifdef __cplusplus
 }

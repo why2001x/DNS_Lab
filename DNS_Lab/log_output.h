@@ -1,5 +1,4 @@
 ﻿/**
- *  @file      log_output.h
  *  @brief     日志服务
  *  @details   可将日志分级输出至屏幕或文件
  *  @author    王海昱
@@ -17,8 +16,13 @@ extern "C"
 {
 #endif
 
-/// 最严重级别
-/// 此类错误很少使用，输出此类错误后应立即结束相关进程
+    /**
+     * @defgroup LogService
+     * @{
+     */
+
+/// @brief 最严重级别
+/// @warning 此类错误很少使用，输出此类错误后应立即结束相关进程
 #define LOG_CRNT (1)
 #define LOG_CRITICAL LOG_CRNT
 
@@ -37,8 +41,8 @@ extern "C"
 #define LOG_DBUG (LOG_INFO << 1)
 #define LOG_DEBUG LOG_DBUG
 
-/// 关闭日志
-/// 虚拟日志等级，仅便于调整日志级别
+/// @brief 关闭日志
+/// @warning 请勿用于输出日志，仅为便于调整日志级别的虚拟日志等级
 #define LOG_OFF (0)
 
 #ifdef NO_LOG_SERVICE
@@ -101,6 +105,8 @@ extern "C"
     extern int lputs(const int WLevel, char const* const Buffer);
 
 #endif // NO_LOG_SERVICE
+
+    /**@}*/
 
 #ifdef __cplusplus
 }

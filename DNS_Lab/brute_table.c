@@ -3,13 +3,13 @@
 #include "log_output.h"
 #include "brute_table.h"
 
-void BruteTableClear(struct BruteTable* const Object)
+static void BruteTableReset(struct BruteTable* const Object)
 {
     if (Object == NULL)
     {
         return;
     }
-    lputs(LOG_DBUG, "BruteTable: Cleaning a BruteTable.");
+    lputs(LOG_DBUG, "BruteTable: Resetting a BruteTable.");
     /// 释放记录指针数组内存空间
     free(Object->Data);
     /// 初始化基本记录表
@@ -19,21 +19,19 @@ void BruteTableClear(struct BruteTable* const Object)
     return;
 }
 
-void BruteTableFree(struct BruteTable* const Object)
+void BruteTableClear(struct BruteTable* const Object)
 {
     if (Object == NULL)
     {
         return;
     }
-    lputs(LOG_DBUG, "BruteTable: Releasing a BruteTable.");
-    /// 释放全部记录内存空间
+    lputs(LOG_DBUG, "BruteTable: Cleaning a BruteTable.");
     for (int i = 0; i < Object->Size; i++)
     {
         RecordNodeFree(Object->Data[i]);
         Object->Data[i] = NULL;
     }
-    /// BruteTableClear
-    BruteTableClear(Object);
+    BruteTableReset(Object);
     return;
 }
 
@@ -68,7 +66,7 @@ int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
         {
             lputs(LOG_DBUG, "BruteTable: Copy the data on the older table.");
             memcpy(Temp.Data, Object->Data, Object->Size * sizeof(struct Record*));
-            BruteTableClear(Object);
+            BruteTableReset(Object);
             lputs(LOG_DBUG, "BruteTable: The older table was released.");
         }
         lputs(LOG_DBUG, "BruteTable: Change to the newer one.");
