@@ -10,6 +10,8 @@
 
 #include "log_output.h"
 
+#ifndef NO_LOG_SERVICE
+
 static FILE* LogFile;
 
 static int LogLevel = LOG_WARN;
@@ -139,3 +141,5 @@ int lputs(const int WLevel, char const* const Buffer)
     }
     return EOF;
 }
+
+#endif // !NO_LOG_SERVICE

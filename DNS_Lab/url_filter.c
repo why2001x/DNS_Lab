@@ -2,9 +2,8 @@
  *  @brief     URL过滤器
  *  @details   URL过滤器相关实现
  *  @author    王海昱
- *  @version   0.0.1a
+ *  @version   0.0.2
  *  @date      2020.07.24-2020.08.10
- *  @warning   仅支持至多$8*10^6$条记录
  */
 
 #include "stdafx.h"
@@ -13,7 +12,8 @@
 #include "record_table.h"
 #include "url_filter.h"
 
-#define BUFFER_SIZE 300 ///< 输入缓冲区长度限制
+/// 输入缓冲区长度限制
+#define BUFFER_SIZE 300
 
 
 RecordTable List;
@@ -84,7 +84,7 @@ int InitURLFilter(const char* const FileName)
     lprintf(LOG_INFO, "URLFilter: %d rules read from file.", Count);
     fclose(RulesFile);
     lputs(LOG_INFO, "URLFilter: Rule file is closed.");
-    RecordTableClear(&List);
+    RecordTableFree(&List);
     List = Temp;
     lputs(LOG_WARN, "URLFilter: Initializing Succeded!");
     return 0;
@@ -112,7 +112,7 @@ static inline void URL2Domain(const char* const URLString, char* const Domain)
     return;
 }
 
-int URLCheck(const int Type, const char* const URLString, void* const IP)
+int URLCheck(const int Type, const char* const URLString, void* const Dst)
 {
     lputs(LOG_INFO, "URLFilter: Accepted a URL query.");
     struct Record Key;
@@ -120,12 +120,12 @@ int URLCheck(const int Type, const char* const URLString, void* const IP)
     switch ((enum QueryType)Key.Type)
     {
     case A:
-        if (IP == NULL)
+        if (Dst == NULL)
         {
             Key.Data.IPv4 = -1;
             break;
         }
-        Key.Data.IPv4 = *(ipv4_t*)IP;
+        Key.Data.IPv4 = *(ipv4_t*)Dst;
         break;
     default:
         lprintf(LOG_WARN, "URLFilter: Unknown query type %d.\n", Type);
@@ -147,7 +147,7 @@ int URLCheck(const int Type, const char* const URLString, void* const IP)
         return 0;
     }
     lputs(LOG_INFO, "URLFilter: Query found.");
-    if (IP == NULL)
+    if (Dst == NULL)
     {
         lputs(LOG_INFO, "URLFilter: But asked for no result.");
         return 1;
@@ -155,7 +155,7 @@ int URLCheck(const int Type, const char* const URLString, void* const IP)
     switch ((enum QueryType)Key.Type)
     {
     case A:
-        *(ipv4_t*)IP = Result->Data.IPv4;
+        *(ipv4_t*)Dst = Result->Data.IPv4;
         break;
     default:
         return 1;

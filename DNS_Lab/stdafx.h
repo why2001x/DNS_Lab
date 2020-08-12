@@ -30,4 +30,6 @@
 #undef NOP
 #endif // NOP
 
+// #define NO_LOG_SERVICE
+
 #endif // STDAFX_H
