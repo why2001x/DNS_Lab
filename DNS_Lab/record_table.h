@@ -1,10 +1,11 @@
-/**
- * @brief     ¼ÇÂ¼±í
- * @details   Ö§³ÖÔö¼Ó/²éÑ¯/Çå¿Õ¼ÇÂ¼¡¢Í¬Ò»¹Ø¼ü×Ö¶à¸ö¼üÖµ
- * @author    Íõº£êÅ
+ï»¿/**
+ * @file      record_table.h
+ * @brief     è®°å½•è¡¨
+ * @details   æ”¯æŒå¢åŠ /æŸ¥è¯¢/æ¸…ç©ºè®°å½•ã€åŒä¸€å…³é”®å­—å¤šä¸ªé”®å€¼
+ * @author    ç‹æµ·æ˜±
  * @version   0.0.2
  * @date      2020.08.10-2020.08.10
- * @warning   ¿í×Ö·ûÎ´¾­²âÊÔ
+ * @warning   å®½å­—ç¬¦æœªç»æµ‹è¯•
  */
 
 #ifndef _RECORD_TABLE_H
@@ -43,41 +44,41 @@ extern "C"
 
 #include "brute_table.h"
     /**
-     * @brief   ¼ÇÂ¼±í
-     * @warning ÇëÊ¹ÓÃRecordTable*º¯Êı½øĞĞ·ÃÎÊ
+     * @brief   è®°å½•è¡¨
+     * @warning è¯·ä½¿ç”¨RecordTable*å‡½æ•°è¿›è¡Œè®¿é—®
      */
     typedef struct BruteTable RecordTable;
 
     /**
-     * @brief Ïò¼ÇÂ¼±í²åÈëÒ»Ìõ¼ÇÂ¼
-     * @param Object Ä¿±ê¼ÇÂ¼±íÖ¸Õë
-     * @param Item   ´ı²åÈë¼ÇÂ¼Ö¸Õë
-     * @return ³É¹¦²åÈë·µ»Ø0£»¼ÇÂ¼±íÒÑÂú·µ»ØÕıÖµ£»ÆäËûÔ­Òò·µ»Ø¸ºÖµ
+     * @brief å‘è®°å½•è¡¨æ’å…¥ä¸€æ¡è®°å½•
+     * @param Object ç›®æ ‡è®°å½•è¡¨æŒ‡é’ˆ
+     * @param Item   å¾…æ’å…¥è®°å½•æŒ‡é’ˆ
+     * @return æˆåŠŸæ’å…¥è¿”å›0ï¼›è®°å½•è¡¨å·²æ»¡è¿”å›æ­£å€¼ï¼›å…¶ä»–åŸå› è¿”å›è´Ÿå€¼
      */
     const int (*RecordTableAppend)(RecordTable* const Object, struct Record* const Item) = BruteTableAppend;
 
     /**
-     * @brief Çå³ı¼ÇÂ¼±í
-     * @param Object Ä¿±ê¼ÇÂ¼±íÖ¸Õë
-     * @warning ½öÇå³ı¼ÇÂ¼±í£¬²»Çå³ı¼ÇÂ¼ÄÚÈİ
+     * @brief æ¸…é™¤è®°å½•è¡¨
+     * @param Object ç›®æ ‡è®°å½•è¡¨æŒ‡é’ˆ
+     * @warning ä»…æ¸…é™¤è®°å½•è¡¨ï¼Œä¸æ¸…é™¤è®°å½•å†…å®¹
      * @see RecordTableFree
      */
     const void (*RecordTableClear)(RecordTable* const Object) = BruteTableClear;
 
     /**
-     * @brief ²éÑ¯¼ÇÂ¼
-     * @details ²éÑ¯½á¹û½«¾¡¿ÉÄÜ²»Í¬ÓÚ²Î¿¼¼ÇÂ¼
-     * @param Object Ä¿±ê»ù±¾¼ÇÂ¼±íÖ¸Õë
-     * @param Key    ²Î¿¼¼ÇÂ¼
-     * @return Èô´æÔÚ£¬·µ»ØKey£»·ñÔò·µ»ØNULL
-     * @warning ²éÑ¯Ê§°Üºó²Î¿¼¼ÇÂ¼ÖĞÊı¾İ²»ÔÙÓĞĞ§
+     * @brief æŸ¥è¯¢è®°å½•
+     * @details æŸ¥è¯¢ç»“æœå°†å°½å¯èƒ½ä¸åŒäºå‚è€ƒè®°å½•
+     * @param Object ç›®æ ‡åŸºæœ¬è®°å½•è¡¨æŒ‡é’ˆ
+     * @param Key    å‚è€ƒè®°å½•
+     * @return è‹¥å­˜åœ¨ï¼Œè¿”å›Keyï¼›å¦åˆ™è¿”å›NULL
+     * @warning æŸ¥è¯¢å¤±è´¥åå‚è€ƒè®°å½•ä¸­æ•°æ®ä¸å†æœ‰æ•ˆ
      */
     const struct Record* const(*RecordCheck)(RecordTable* const Object, struct Record* const Key) = BruteTableCheck;
 
     /**
-     * @brief ÊÍ·Å¼ÇÂ¼±í
-     * @param Object Ä¿±ê»ù±¾¼ÇÂ¼±íÖ¸Õë
-     * @warning Çå³ı¼ÇÂ¼±í¼°±íÄÚ¼ÇÂ¼ÄÚÈİ
+     * @brief é‡Šæ”¾è®°å½•è¡¨
+     * @param Object ç›®æ ‡åŸºæœ¬è®°å½•è¡¨æŒ‡é’ˆ
+     * @warning æ¸…é™¤è®°å½•è¡¨åŠè¡¨å†…è®°å½•å†…å®¹
      * @see RecordTableClear
      */
     const void (*RecordTableFree)(RecordTable* const Object) = BruteTableFree;
@@ -85,8 +86,8 @@ extern "C"
 #ifdef _DEBUG
 
     /**
-     * @brief ¼ÇÂ¼±í¿ÉÊÓ»¯Êä³öÖÁstdout
-     * @param Object Ä¿±ê¼ÇÂ¼±íÖ¸Õë
+     * @brief è®°å½•è¡¨å¯è§†åŒ–è¾“å‡ºè‡³stdout
+     * @param Object ç›®æ ‡è®°å½•è¡¨æŒ‡é’ˆ
      */
     const void (*RecordTablePrint)(struct RecordTable* const Object) = BruteTablePrint;
 

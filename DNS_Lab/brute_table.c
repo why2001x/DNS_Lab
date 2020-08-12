@@ -1,14 +1,4 @@
-/**
- * @brief     »ù±¾¼ÇÂ¼±í
- * @details   ÉýÐò¼ÇÂ¼£¬¶þ·Ö²éÕÒ£¬Ö§³ÖÍ¬Ò»¹Ø¼ü×Ö¶à¸ö¼üÖµ
- * @author    Íõº£êÅ
- * @version   0.0.2
- * @date      2020.08.09-2020.08.12
- * @warning   ½öÖ§³ÖÖÁ¶à$8*10^6$Ìõ¼ÇÂ¼
- * @warning   ¿í×Ö·ûÎ´¾­²âÊÔ
- */
-
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 
 #include "log_output.h"
 #include "brute_table.h"
@@ -20,9 +10,9 @@ void BruteTableClear(struct BruteTable* const Object)
         return;
     }
     lputs(LOG_DBUG, "BruteTable: Cleaning a BruteTable.");
-    /// ÊÍ·Å¼ÇÂ¼Ö¸ÕëÊý×éÄÚ´æ¿Õ¼ä
+    /// é‡Šæ”¾è®°å½•æŒ‡é’ˆæ•°ç»„å†…å­˜ç©ºé—´
     free(Object->Data);
-    /// ³õÊ¼»¯»ù±¾¼ÇÂ¼±í
+    /// åˆå§‹åŒ–åŸºæœ¬è®°å½•è¡¨
     Object->Data = Object->End = NULL;
     Object->Size = 0;
     Object->Ready = false;
@@ -36,7 +26,7 @@ void BruteTableFree(struct BruteTable* const Object)
         return;
     }
     lputs(LOG_DBUG, "BruteTable: Releasing a BruteTable.");
-    /// ÊÍ·ÅÈ«²¿¼ÇÂ¼ÄÚ´æ¿Õ¼ä
+    /// é‡Šæ”¾å…¨éƒ¨è®°å½•å†…å­˜ç©ºé—´
     for (int i = 0; i < Object->Size; i++)
     {
         RecordNodeFree(Object->Data[i]);
@@ -52,17 +42,17 @@ void BruteTableFree(struct BruteTable* const Object)
 #define STEP_BT_MAX 2048
 int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
 {
-    /// ÅÐ¶Ï±íÄÚ¿Õ¼äÊÇ·ñÒÑÂú
+    /// åˆ¤æ–­è¡¨å†…ç©ºé—´æ˜¯å¦å·²æ»¡
     if (Object->Data + Object->Size == Object->End)
     {
         lputs(LOG_DBUG, "BruteTable: Expanding the BruteTable.");
-        /// ÅÐ¶Ï±í¼ÇÂ¼ÊýÊÇ·ñµ½´ïÔ¼¶¨ÉÏÏÞ
+        /// åˆ¤æ–­è¡¨è®°å½•æ•°æ˜¯å¦åˆ°è¾¾çº¦å®šä¸Šé™
         if (Object->Size >= MAX_SIZE)
         {
             lputs(LOG_WARN, "BruteTable: The number of rules more than the limit! Skipped.");
             return 1;
         }
-        /// ³õÊ¼»¯ÐÂ±í
+        /// åˆå§‹åŒ–æ–°è¡¨
         struct BruteTable Temp = { NULL };
         Temp.Size = Object->Size + min(STEP_BT_MAX, max(STEP_BT_MIN, Object->Size));
         Temp.Data = (struct Record**)malloc(Temp.Size * sizeof(struct Record*));
@@ -73,7 +63,7 @@ int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
         }
         memset(Temp.Data, 0, Temp.Size * sizeof(struct Record*));
         Temp.End = Temp.Data + Object->Size;
-        /// ¿½±´¾É±í¼ÇÂ¼ÖÁÐÂ±í
+        /// æ‹·è´æ—§è¡¨è®°å½•è‡³æ–°è¡¨
         if (Object->Data != NULL)
         {
             lputs(LOG_DBUG, "BruteTable: Copy the data on the older table.");
@@ -84,7 +74,7 @@ int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
         lputs(LOG_DBUG, "BruteTable: Change to the newer one.");
         memcpy(Object, &Temp, sizeof(struct BruteTable));
     }
-    /// Ìí¼Ó´ý²åÈë¼ÇÂ¼
+    /// æ·»åŠ å¾…æ’å…¥è®°å½•
     *(Object->End) = Item;
     Object->End++;
     Object->Ready = false;
@@ -110,13 +100,13 @@ static void BruteTableUnique(struct BruteTable* const Object)
     {
         return;
     }
-    /// ¼ÇÂ¼È¥ÖØ
+    /// è®°å½•åŽ»é‡
     struct Record** Dst = Object->Data;
     for (struct Record** it = Object->Data + 1; it != Object->End; it++)
     {
         if (RecordSortComp(it, Dst) == 0)
         {
-            /// ÊÍ·ÅÎÞÓÃ¼ÇÂ¼£¬±ÜÃâÄÚ´æÐ¹Â¶
+            /// é‡Šæ”¾æ— ç”¨è®°å½•ï¼Œé¿å…å†…å­˜æ³„éœ²
             RecordNodeFree(*it);
             continue;
         }
@@ -124,7 +114,7 @@ static void BruteTableUnique(struct BruteTable* const Object)
         *Dst = *it;
     }
     Dst++;
-    /// Î¬»¤±íÄÚÐÅÏ¢
+    /// ç»´æŠ¤è¡¨å†…ä¿¡æ¯
     for (struct Record** it = Dst; it != Object->End; it++)
     {
         *it = NULL;

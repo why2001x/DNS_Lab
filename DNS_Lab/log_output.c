@@ -1,12 +1,4 @@
-/**
- *  @brief     日志服务
- *  @details   日志服务相关实现
- *  @author    王海昱
- *  @version   0.0.1d
- *  @date      2020.07.24-2020.07.10
- */
-
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 #include "log_output.h"
 

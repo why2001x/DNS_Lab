@@ -1,7 +1,7 @@
-/**
- *  @brief     DNS����ͷ
- *  @details   ��
- *  @author    ���
+﻿/**
+ *  @brief     DNS报文头
+ *  @details   此
+ *  @author    方淇
  *  @version   0.1
  *  @date      2020.07.11-2020.07.12
  */
@@ -14,22 +14,22 @@ extern "C" {
 #endif
 
 	//ID
-	//�ɿͻ��������ò��ɷ��������ؽ�����ͻ�����ͨ������ȷ����Ӧ���ѯ�Ƿ�ƥ��
-	//QR��0��ʾ��ѯ����1��ʾ��Ӧ����
+	//由客户程序设置并由服务器返回结果。客户程序通过它来确定响应与查询是否匹配
+	//QR：0表示查询报，1表示响应报。
 	//OPCODE
-	//ͨ��ֵΪ0����׼��ѯ��������ֵΪ1�������ѯ����2��������״̬���󣩡�
-	//AA : Ȩ����(Authoritative answer)
-	//TC : �ضϵ�(Truncated)
-	//Ӧ����ܳ��ȳ�512�ֽ�ʱ��ֻ����ǰ512���ֽ�
-	//RD : �����ݹ�(Recursion desired)
-	//��ѯ�������ã���Ӧ���з���
-	//�������ַ����������ݹ��ѯ�������λΪ0���ұ���������ַ�����û��һ��Ȩ���ش𣬾ͷ���һ���ܽ��ò�ѯ���������ַ������б������Ϊ������ѯ
-	//RA���ݹ����(Recursion Available)
-	//������ַ�����֧�ֵݹ��ѯ��������Ӧ�иñ�����Ϊ1
-	//Z������Ϊ0�������ֶ�
-	//RCODE : ��Ӧ��(Response coded)����������Ӧ��
-	//ֵΪ0(û�в��)
-	//ֵΪ3��ʾ���ֲ������Ȩ�����ַ��������أ���ʾ�ڲ�ѯ��ָ������������
+	//通常值为0（标准查询），其他值为1（反向查询）和2（服务器状态请求）。
+	//AA : 权威答案(Authoritative answer)
+	//TC : 截断的(Truncated)
+	//应答的总长度超512字节时，只返回前512个字节
+	//RD : 期望递归(Recursion desired)
+	//查询报中设置，响应报中返回
+	//告诉名字服务器处理递归查询。如果该位为0，且被请求的名字服务器没有一个权威回答，就返回一个能解答该查询的其他名字服务器列表，这称为迭代查询
+	//RA：递归可用(Recursion Available)
+	//如果名字服务器支持递归查询，则在响应中该比特置为1
+	//Z：必须为0，保留字段
+	//RCODE : 响应码(Response coded)，仅用于响应报
+	//值为0(没有差错)
+	//值为3表示名字差错。从权威名字服务器返回，表示在查询中指定域名不存在
 	//QDCOUNT
 	//Number of entries in the question section
 	//ANCOUNT

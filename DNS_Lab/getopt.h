@@ -1,4 +1,4 @@
-#ifndef _GETOPT_H
+﻿#ifndef _GETOPT_H
 #define _GETOPT_H
 
 

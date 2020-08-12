@@ -1,9 +1,10 @@
-/**
- * @brief     ¼ÇÂ¼¸ñÊ½
- * @author    Íõº£êÅ
+ï»¿/**
+ * @file      record.h
+ * @brief     è®°å½•æ ¼å¼
+ * @author    ç‹æµ·æ˜±
  * @version   0.0.1a
  * @date      2020.08.10-2020.08.10
- * @warning   ¿í×Ö·ûÎ´¾­²âÊÔ
+ * @warning   å®½å­—ç¬¦æœªç»æµ‹è¯•
  */
 
 #ifndef _RECORD_H
@@ -15,13 +16,13 @@ extern "C"
 #endif
 #include "dnsdef.h"
 
-    /// ¼ÇÂ¼ÄÚÊı¾İÀàĞÍ
+    /// è®°å½•å†…æ•°æ®ç±»å‹
     union RecordData
     {
         ipv4_t IPv4;
     };
 
-    /// µ¥Ìõ¼ÇÂ¼
+    /// å•æ¡è®°å½•
     struct Record
     {
         uchar Type;
@@ -30,54 +31,54 @@ extern "C"
     };
 
     /**
-     * @brief ÅÅĞòÓÃ¼ÇÂ¼±È½Ïº¯Êı
-     * @details ×óÓÒÁ½²àÄÚÈİÂú×ãÈ«Ğò¹ØÏµ
-     * @param LPtr ¹ØÏµ×ó²à¼ÇÂ¼Ö¸Õë
-     * @param RPtr ¹ØÏµÓÒ²à¼ÇÂ¼Ö¸Õë
-     * @return ×óÓÒÏàµÈ·µ»Ø0£¬×ó²àÔÚÇ°·µ»ØÕıÖµ£¬·ñÔòÎª¸ºÖµ
+     * @brief æ’åºç”¨è®°å½•æ¯”è¾ƒå‡½æ•°
+     * @details å·¦å³ä¸¤ä¾§å†…å®¹æ»¡è¶³å…¨åºå…³ç³»
+     * @param LPtr å…³ç³»å·¦ä¾§è®°å½•æŒ‡é’ˆ
+     * @param RPtr å…³ç³»å³ä¾§è®°å½•æŒ‡é’ˆ
+     * @return å·¦å³ç›¸ç­‰è¿”å›0ï¼Œå·¦ä¾§åœ¨å‰è¿”å›æ­£å€¼ï¼Œå¦åˆ™ä¸ºè´Ÿå€¼
      */
     int RecordSortComp(void* LPtr, void* RPtr);
 
     /**
-     * @brief ²éÑ¯ÓÃ¼ÇÂ¼±È½Ïº¯Êı
-     * @details Êı¾İÓòÊÇ·ñ²ÎÓë±È½ÏÈ¡¾öÓÚÄ¿±ê¼ÇÂ¼ÄÚÈİ
-     * @param KeyPtr Ä¿±ê¼ÇÂ¼Ö¸Õë
-     * @param ParPtr ²Î¿¼¼ÇÂ¼Ö¸Õë
-     * @return Æ¥Åä·µ»Ø0£¬Ó¦Ïòºó²éÑ¯·µ»ØÕıÖµ£¬·ñÔòÎª¸ºÖµ
+     * @brief æŸ¥è¯¢ç”¨è®°å½•æ¯”è¾ƒå‡½æ•°
+     * @details æ•°æ®åŸŸæ˜¯å¦å‚ä¸æ¯”è¾ƒå–å†³äºç›®æ ‡è®°å½•å†…å®¹
+     * @param KeyPtr ç›®æ ‡è®°å½•æŒ‡é’ˆ
+     * @param ParPtr å‚è€ƒè®°å½•æŒ‡é’ˆ
+     * @return åŒ¹é…è¿”å›0ï¼Œåº”å‘åæŸ¥è¯¢è¿”å›æ­£å€¼ï¼Œå¦åˆ™ä¸ºè´Ÿå€¼
      */
     int RecordFindComp(void* KeyPtr, void* ParPtr);
 
     /**
-     * @brief ²éÑ¯ÓÃ¼ÇÂ¼Èõ±È½Ïº¯Êı
-     * @details Êı¾İÓò²»²ÎÓë±È½Ï
-     * @param KeyPtr Ä¿±ê¼ÇÂ¼Ö¸Õë
-     * @param ParPtr ²Î¿¼¼ÇÂ¼Ö¸Õë
-     * @return Æ¥Åä·µ»Ø0£¬Ó¦Ïòºó²éÑ¯·µ»ØÕıÖµ£¬·ñÔòÎª¸ºÖµ
+     * @brief æŸ¥è¯¢ç”¨è®°å½•å¼±æ¯”è¾ƒå‡½æ•°
+     * @details æ•°æ®åŸŸä¸å‚ä¸æ¯”è¾ƒ
+     * @param KeyPtr ç›®æ ‡è®°å½•æŒ‡é’ˆ
+     * @param ParPtr å‚è€ƒè®°å½•æŒ‡é’ˆ
+     * @return åŒ¹é…è¿”å›0ï¼Œåº”å‘åæŸ¥è¯¢è¿”å›æ­£å€¼ï¼Œå¦åˆ™ä¸ºè´Ÿå€¼
      */
     int RecordFindCompU(void* KeyPtr, void* ParPtr);
 
     /**
-     * @brief ¼ÇÂ¼³õÊ¼»¯
-     * @param Object ¼ÇÂ¼Ö¸Õë
-     * @param Type   ¼ÇÂ¼ÀàĞÍ
-     * @param Data   Êı¾İÄÚÈİ
-     * @param Domain ÓòÃû
-     * @return ³É¹¦³õÊ¼»¯·µ»Ø0£»²»Ö§³Ö¼ÇÂ¼ÀàĞÍ·µ»ØÕıÖµ£»ÆäËûÔ­Òò·µ»Ø¸ºÖµ
+     * @brief è®°å½•åˆå§‹åŒ–
+     * @param Object è®°å½•æŒ‡é’ˆ
+     * @param Type   è®°å½•ç±»å‹
+     * @param Data   æ•°æ®å†…å®¹
+     * @param Domain åŸŸå
+     * @return æˆåŠŸåˆå§‹åŒ–è¿”å›0ï¼›ä¸æ”¯æŒè®°å½•ç±»å‹è¿”å›æ­£å€¼ï¼›å…¶ä»–åŸå› è¿”å›è´Ÿå€¼
      */
     int RecordNodeInit(struct Record* const Object, const uchar Type, const union RecordData Data, const char* const Domain);
 
     /**
-     * @brief ¹¹ÔìÒ»Ìõ¼ÇÂ¼
-     * @param Type   ¼ÇÂ¼ÀàĞÍ
-     * @param Data   Êı¾İÄÚÈİ
-     * @param Domain ÓòÃû
-     * @return ³É¹¦·µ»ØÖ¸Ïò¼ÇÂ¼µÄÖ¸Õë£»·ñÔò·µ»ØNULL
+     * @brief æ„é€ ä¸€æ¡è®°å½•
+     * @param Type   è®°å½•ç±»å‹
+     * @param Data   æ•°æ®å†…å®¹
+     * @param Domain åŸŸå
+     * @return æˆåŠŸè¿”å›æŒ‡å‘è®°å½•çš„æŒ‡é’ˆï¼›å¦åˆ™è¿”å›NULL
      */
     struct Record* RecordNode(const uchar Type, const union RecordData Data, const char* const Domain);
 
     /**
-     * @brief ÊÍ·ÅÒ»Ìõ¼ÇÂ¼
-     * @param Object Ä¿±ê¼ÇÂ¼Ö¸Õë
+     * @brief é‡Šæ”¾ä¸€æ¡è®°å½•
+     * @param Object ç›®æ ‡è®°å½•æŒ‡é’ˆ
      */
     void RecordNodeFree(struct Record* const Object);
 

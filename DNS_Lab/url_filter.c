@@ -1,20 +1,8 @@
-/**
- *  @brief     URL过滤器
- *  @details   URL过滤器相关实现
- *  @author    王海昱
- *  @version   0.0.2
- *  @date      2020.07.24-2020.08.10
- */
-
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 #include "log_output.h"
 #include "record_table.h"
 #include "url_filter.h"
-
-/// 输入缓冲区长度限制
-#define BUFFER_SIZE 300
-
 
 RecordTable List;
 

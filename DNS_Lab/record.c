@@ -1,12 +1,4 @@
-/**
- * @brief     ¼ÇÂ¼Ïà¹ØÊµÏÖ
- * @author    Íõº£êÅ
- * @version   0.0.1a
- * @date      2020.08.10-2020.08.10
- * @warning   ¿í×Ö·ûÎ´¾­²âÊÔ
- */
-
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 
 #include "log_output.h"
 

@@ -1,4 +1,5 @@
-/**
+﻿/**
+ *  @file      log_output.h
  *  @brief     日志服务
  *  @details   可将日志分级输出至屏幕或文件
  *  @author    王海昱

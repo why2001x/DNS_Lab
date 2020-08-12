@@ -1,6 +1,7 @@
-/**
- * @brief Ô¤±àÒëÍ·ÎÄ¼þ
- * @author why2001
+ï»¿/**
+ * @file    stdafx.h
+ * @brief   é¢„ç¼–è¯‘å¤´æ–‡ä»¶
+ * @author  why2001
  * @version 0.0.1
  */
 #ifndef STDAFX_H

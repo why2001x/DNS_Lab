@@ -1,11 +1,12 @@
-/**
- * @brief     »ù±¾¼ÇÂ¼±í
- * @details   ÉıĞò¼ÇÂ¼£¬¶ş·Ö²éÕÒ£¬Ö§³ÖÍ¬Ò»¹Ø¼ü×Ö¶à¸ö¼üÖµ
- * @author    Íõº£êÅ
+ï»¿/**
+ * @file      brute_table.h
+ * @brief     åŸºæœ¬è®°å½•è¡¨
+ * @details   å‡åºè®°å½•ï¼ŒäºŒåˆ†æŸ¥æ‰¾ï¼Œæ”¯æŒåŒä¸€å…³é”®å­—å¤šä¸ªé”®å€¼
+ * @author    ç‹æµ·æ˜±
  * @version   0.0.2
  * @date      2020.08.09-2020.08.12
- * @warning   ½öÖ§³ÖÖÁ¶à$8*10^6$Ìõ¼ÇÂ¼
- * @warning   ¿í×Ö·ûÎ´¾­²âÊÔ
+ * @warning   ä»…æ”¯æŒè‡³å¤š$8*10^6$æ¡è®°å½•
+ * @warning   å®½å­—ç¬¦æœªç»æµ‹è¯•
  */
 
 #ifndef _BRUTE_TABLE_H
@@ -20,54 +21,54 @@ extern "C"
 #include "record.h"
 
     /**
-     * @brief »ù±¾¼ÇÂ¼±í
-     * @warning ÇëÎğÖ±½ÓĞŞ¸Ä´Ë½á¹¹ÌåÄÚÊı¾İ£¬³ı·ÇÄúÍêÈ«ÁË½âÒÔÉÏĞĞÎªµÄÓ°Ïì
+     * @brief åŸºæœ¬è®°å½•è¡¨
+     * @warning è¯·å‹¿ç›´æ¥ä¿®æ”¹æ­¤ç»“æ„ä½“å†…æ•°æ®ï¼Œé™¤éæ‚¨å®Œå…¨äº†è§£ä»¥ä¸Šè¡Œä¸ºçš„å½±å“
      */
     struct BruteTable
     {
-        /// ²éÑ¯¾ÍĞ÷±êÊ¶
+        /// æŸ¥è¯¢å°±ç»ªæ ‡è¯†
         bool Ready;
 
-        /// Ö¸ÏòÊ×Ìõ¼ÇÂ¼Ö¸ÕëµÄÖ¸Õë
+        /// æŒ‡å‘é¦–æ¡è®°å½•æŒ‡é’ˆçš„æŒ‡é’ˆ
         struct Record** Data;
 
-        /// Ö¸ÏòÄ©Î²¼ÇÂ¼Ö¸ÕëºóµÄÖ¸Õë
+        /// æŒ‡å‘æœ«å°¾è®°å½•æŒ‡é’ˆåçš„æŒ‡é’ˆ
         struct Record** End;
 
-        /// µ±Ç°±íÄÚ¼ÇÂ¼ÊıÉÏÏŞ
+        /// å½“å‰è¡¨å†…è®°å½•æ•°ä¸Šé™
         size_t Size;
     };
 
     /**
-     * @brief Ìí¼Ó¼ÇÂ¼
-     * @param Object Ä¿±ê»ù±¾¼ÇÂ¼±íÖ¸Õë
-     * @param Item   Ä¿±ê¼ÇÂ¼
-     * @return ³É¹¦²åÈë·µ»Ø0£»¼ÇÂ¼±íÒÑÂú·µ»ØÕıÖµ£»ÆäËûÔ­Òò·µ»Ø¸ºÖµ     
+     * @brief æ·»åŠ è®°å½•
+     * @param Object ç›®æ ‡åŸºæœ¬è®°å½•è¡¨æŒ‡é’ˆ
+     * @param Item   ç›®æ ‡è®°å½•
+     * @return æˆåŠŸæ’å…¥è¿”å›0ï¼›è®°å½•è¡¨å·²æ»¡è¿”å›æ­£å€¼ï¼›å…¶ä»–åŸå› è¿”å›è´Ÿå€¼     
      */
     int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item);
 
     /**
-     * @brief Çå³ı¼ÇÂ¼±í
-     * @param Object Ä¿±ê»ù±¾¼ÇÂ¼±íÖ¸Õë
-     * @warning ½öÇå³ı¼ÇÂ¼±í£¬²»Çå³ı¼ÇÂ¼ÄÚÈİ
+     * @brief æ¸…é™¤è®°å½•è¡¨
+     * @param Object ç›®æ ‡åŸºæœ¬è®°å½•è¡¨æŒ‡é’ˆ
+     * @warning ä»…æ¸…é™¤è®°å½•è¡¨ï¼Œä¸æ¸…é™¤è®°å½•å†…å®¹
      * @see BruteTableFree
      */
     void BruteTableClear(struct BruteTable* const Object);
 
     /**
-     * @brief ²éÑ¯¼ÇÂ¼
-     * @details ²éÑ¯½á¹û½«¾¡¿ÉÄÜ²»Í¬ÓÚ²Î¿¼¼ÇÂ¼
-     * @param Object Ä¿±ê»ù±¾¼ÇÂ¼±íÖ¸Õë
-     * @param Key    ²Î¿¼¼ÇÂ¼
-     * @return Èô´æÔÚ£¬·µ»ØKey£»·ñÔò·µ»ØNULL
-     * @warning ²éÑ¯Ê§°Üºó²Î¿¼¼ÇÂ¼ÖĞÊı¾İ²»ÔÙÓĞĞ§
+     * @brief æŸ¥è¯¢è®°å½•
+     * @details æŸ¥è¯¢ç»“æœå°†å°½å¯èƒ½ä¸åŒäºå‚è€ƒè®°å½•
+     * @param Object ç›®æ ‡åŸºæœ¬è®°å½•è¡¨æŒ‡é’ˆ
+     * @param Key    å‚è€ƒè®°å½•
+     * @return è‹¥å­˜åœ¨ï¼Œè¿”å›Keyï¼›å¦åˆ™è¿”å›NULL
+     * @warning æŸ¥è¯¢å¤±è´¥åå‚è€ƒè®°å½•ä¸­æ•°æ®ä¸å†æœ‰æ•ˆ
      */
     struct Record* const BruteTableCheck(struct BruteTable* const Object, struct Record* const Key);
 
     /**
-     * @brief ÊÍ·Å¼ÇÂ¼±í
-     * @param Object Ä¿±ê»ù±¾¼ÇÂ¼±íÖ¸Õë
-     * @warning Çå³ı¼ÇÂ¼±í¼°±íÄÚ¼ÇÂ¼ÄÚÈİ
+     * @brief é‡Šæ”¾è®°å½•è¡¨
+     * @param Object ç›®æ ‡åŸºæœ¬è®°å½•è¡¨æŒ‡é’ˆ
+     * @warning æ¸…é™¤è®°å½•è¡¨åŠè¡¨å†…è®°å½•å†…å®¹
      * @see BruteTableClear
      */
     void BruteTableFree(struct BruteTable* const Object);
@@ -75,8 +76,8 @@ extern "C"
 #ifdef _DEBUG
 
     /**
-     * @brief ¼ÇÂ¼±í¿ÉÊÓ»¯Êä³öÖÁstdout
-     * @param Object Ä¿±ê»ù±¾¼ÇÂ¼±íÖ¸Õë
+     * @brief è®°å½•è¡¨å¯è§†åŒ–è¾“å‡ºè‡³stdout
+     * @param Object ç›®æ ‡åŸºæœ¬è®°å½•è¡¨æŒ‡é’ˆ
      */
     void BruteTablePrint(struct BruteTable* const Object);
 

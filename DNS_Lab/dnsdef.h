@@ -1,4 +1,5 @@
-/**
+﻿/**
+ *  @file      dnsdef.h
  *  @brief     数据类型定义
  *  @author    王海昱
  *  @version   0.0.1
