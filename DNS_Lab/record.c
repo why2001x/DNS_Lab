@@ -4,6 +4,8 @@
 
 #include "record.h"
 
+const union RecordData RECORD_DATA_MAX = { .IPv6.u.Word = {-1,-1,-1,-1,-1,-1,-1,-1} };
+
 int RecordSortComp(void* LPtr, void* RPtr)
 {
 	struct Record Lhs = **(struct Record**)LPtr, Rhs = **(struct Record**)RPtr;
@@ -20,6 +22,8 @@ int RecordSortComp(void* LPtr, void* RPtr)
 	{
 	case A:
 		return ipv4Comp(Lhs.Data.IPv4, Rhs.Data.IPv4);
+	case AAAA:
+		return ipv6Comp(Lhs.Data.IPv6, Rhs.Data.IPv6);
 	default:
 		return 0;
 	}
@@ -39,11 +43,17 @@ int RecordFindComp(void* KeyPtr, void* ParPtr)
 	switch ((enum QueryType)Key.Type)
 	{
 	case A:
-		if (Key.Data.IPv4 == -1)
+		if (ipv4Comp(Key.Data.IPv4, RECORD_DATA_MAX.IPv4) == 0)
 		{
 			return 0;
 		}
 		return ipv4Comp(Key.Data.IPv4, Par.Data.IPv4);
+	case AAAA:
+		if (ipv6Comp(Key.Data.IPv6, RECORD_DATA_MAX.IPv6) == 0)
+		{
+			return 0;
+		}
+		return ipv6Comp(Key.Data.IPv6, Par.Data.IPv6);
 	default:
 		return 0;
 	}
@@ -75,7 +85,11 @@ int RecordNodeInit(struct Record* const Object, const uchar Type, const union Re
 	{
 	case A:
 		lputs(LOG_DBUG, "RecordNode: Record A.");
-		Object->Data.IPv4 = Data.IPv4;
+		Object->Data = Data;
+		break;
+	case AAAA:
+		lputs(LOG_DBUG, "RecordNode: Record AAAA.");
+		Object->Data = Data;
 		break;
 	default:
 		lprintf(LOG_WARN, "RecordNode: Unknown query type %d skipped.\n", Type);
