@@ -1,0 +1,16 @@
+2020-09-10 19:52:09 Warning: URLFilter: Initializing...
+2020-09-10 19:52:09 Error: URLFilter: Error while opening the specified file!
+2020-09-10 19:52:09 Error: URLFilter: Existing rules unchanged.
+2020-09-10 19:52:09 Error: URLFilter: Initializing Failed!
+2020-09-10 21:07:59 Warning: URLFilter: Initializing...
+2020-09-10 21:07:59 Error: URLFilter: Error while opening the specified file!
+2020-09-10 21:07:59 Error: URLFilter: Existing rules unchanged.
+2020-09-10 21:07:59 Error: URLFilter: Initializing Failed!
+2020-09-10 21:08:15 Warning: URLFilter: Initializing...
+2020-09-10 21:08:15 Error: URLFilter: Error while opening the specified file!
+2020-09-10 21:08:15 Error: URLFilter: Existing rules unchanged.
+2020-09-10 21:08:15 Error: URLFilter: Initializing Failed!
+2020-09-10 21:08:29 Warning: URLFilter: Initializing...
+2020-09-10 21:08:29 Error: URLFilter: Error while opening the specified file!
+2020-09-10 21:08:29 Error: URLFilter: Existing rules unchanged.
+2020-09-10 21:08:29 Error: URLFilter: Initializing Failed!

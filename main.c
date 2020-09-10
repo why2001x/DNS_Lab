@@ -66,29 +66,26 @@ void argRes(int argc, char* argv[]) {
 	//verbose normal server filename
 	while ((ch = getopt(argc, argv, "dDs:f:")) != -1)
 	{
-		printf("optind: %d\n", optind);
 		switch (ch)
 		{
 			//普通log
 		case 'd':
 			SetLogLevel(LOG_INFO);
-			printf("HAVE option: -d\n\n");
+			printf("LOG LEVEL：INFO\n");
 			break;
 		case 'D':
 			//详细log
 			SetLogLevel(LOG_DEBUG);
-			printf("HAVE option: -D\n");
+			printf("LOGO LEVEL：DEBUG\n");
 			break;
 		case 's':
 			//指定上游服务器
 			memcpy(dnsServer, optarg, strlen(optarg));
-			printf("HAVE option: -s\n");
-			printf("The argument of -s is %s\n\n", optarg);
+			printf("UPSTREAM SERVER：%s\n", optarg);
 			break;
 		case 'f':
 			//指定host
-			printf("HAVE option: -f\n");
-			printf("The argument of -f is %s\n\n", optarg);
+			printf("HOST FILE DIR：%s\n", optarg);
 			InitURLFilter(optarg);
 			break;
 		default:
