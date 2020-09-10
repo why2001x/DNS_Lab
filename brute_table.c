@@ -40,6 +40,10 @@ void BruteTableClear(struct BruteTable* const Object)
 #define STEP_BT_MAX 2048
 int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
 {
+#ifdef _THR_XTHREADS_H
+
+#else
+#endif
     /// 判断表内空间是否已满
     if (Object->Data + Object->Size == Object->End)
     {
@@ -70,13 +74,17 @@ int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
             lputs(LOG_DBUG, "BruteTable: The older table was released.");
         }
         lputs(LOG_DBUG, "BruteTable: Change to the newer one.");
+        Object->Ready = false;
         memcpy(Object, &Temp, sizeof(struct BruteTable));
     }
     /// 添加待插入记录
+    Object->Ready = false;
     *(Object->End) = Item;
     Object->End++;
-    Object->Ready = false;
     lputs(LOG_DBUG, "BruteTable: A Record add to the end of BruteTable.");
+#ifdef _THR_XTHREADS_H
+#else
+#endif
     return 0;
 }
 #undef MAX_SIZE
@@ -146,57 +154,114 @@ static struct Record** BruteTableBSearch(struct Record* const Key, const struct 
 
 struct Record* const BruteTableCheck(struct BruteTable* const Object, struct Record* const Key)
 {
-    if (Key == NULL)
+    /// 空表
+    if (Object->Data == Object->End)
     {
         return NULL;
     }
+    /// 若记录表未就绪，排序并去重
     if (!Object->Ready)
     {
         BruteTableSort(Object);
         BruteTableUnique(Object);
         Object->Ready = true;
     }
-    struct Record** Pos = BruteTableBSearch(Key, Object->Data, Object->End, RecordFindComp);
-    if (Pos == NULL)
+    /// 非查询请求
+    if (Key == NULL)
     {
         return NULL;
     }
+    /// 首次查询
+    /// 保证与Key的域名、记录类型匹配，但记录内容不同
+    struct Record** Pos = BruteTableBSearch(Key, Object->Data, Object->End, RecordFindComp);
     switch ((enum QueryType)Key->Type)
     {
     case A:
+        /// 不存在符合条件的记录
         if (RecordFindCompU(&Key, Pos))
         {
-            Key->Data.IPv4 = -1;
+            /// 键值改为理论最大值
+            Key->Data = RECORD_DATA_MAX;
             break;
         }
-        if (Key->Data.IPv4 != (*Pos)->Data.IPv4)
+        /// 若记录正确且内容与键值不同
+        if (ipv4Comp(Key->Data.IPv4, (*Pos)->Data.IPv4))
         {
-            Key->Data.IPv4 = (*Pos)->Data.IPv4;
+            /// 返回查询结果
+            Key->Data = (*Pos)->Data;
             return Key;
         }
+        /// 若本条记录为表内首条记录
         if (Pos-- == Object->Data)
         {
+            /// 跳出
             break;
         }
+        /// 查询上一条记录
+        /// 若满足条件
         if (RecordFindCompU(&Key, Pos) == 0)
         {
-            Key->Data.IPv4 = (*Pos)->Data.IPv4;
+            /// 返回查询结果
+            Key->Data = (*Pos)->Data;
             return Key;
         }
-        Key->Data.IPv4 = -1;
+        /// 键值改为理论最大值
+        Key->Data = RECORD_DATA_MAX;
+        /// 转交二次查询
+        break;
+    case AAAA:
+        /// 不存在符合条件的记录
+        if (RecordFindCompU(&Key, Pos))
+        {
+            /// 键值改为理论最大值
+            Key->Data = RECORD_DATA_MAX;
+            break;
+        }
+        /// 若记录正确且内容与键值不同
+        if (ipv6Comp(Key->Data.IPv6, (*Pos)->Data.IPv6))
+        {
+            /// 返回查询结果
+            Key->Data = (*Pos)->Data;
+            return Key;
+        }
+        /// 若本条记录为表内首条记录
+        if (Pos-- == Object->Data)
+        {
+            /// 跳出
+            break;
+        }
+        /// 查询上一条记录
+        /// 若满足条件
+        if (RecordFindCompU(&Key, Pos) == 0)
+        {
+            /// 返回查询结果
+            Key->Data = (*Pos)->Data;
+            return Key;
+        }
+        /// 键值改为理论最大值
+        Key->Data = RECORD_DATA_MAX;
+        /// 转交二次查询
         break;
     default:
         return NULL;
     }
+    /// 二次查询
+    /// 保证与Key的域名、记录类型匹配
+    /// 此次查询返回同域名、记录类型中满足条件的最后一条记录
+    /// 保证当且仅当此次仍无匹配项，全表无匹配项
     Pos = BruteTableBSearch(Key, Object->Data, Object->End, RecordFindComp);
     switch ((enum QueryType)Key->Type)
     {
     case A:
+    case AAAA:
+        /// 若查询结果不符合条件
+        /// 即全表无符合条件的值
         if (RecordFindCompU(&Key, Pos))
         {
             return NULL;
         }
-        Key->Data.IPv4 = (*Pos)->Data.IPv4;
+        /// 返回查询结果
+        Key->Data = (*Pos)->Data;
         return Key;
     default:
         return NULL;

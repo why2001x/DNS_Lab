@@ -23,28 +23,58 @@ int InitURLFilter(const char* const FileName)
     int Count = 0;
     for (char Buffer[BUFFER_SIZE]; fgets(Buffer, BUFFER_SIZE, RulesFile); Count++)
     {
-        char Domain[BUFFER_SIZE];
+        /// 清除行末多余字符
+        if (strlen(Buffer) >= (BUFFER_SIZE - 1))
+        {
+            scanf("%*[\n\r\0]");
+        }
+        /// 注释
         if (strstr(Buffer, "#") != NULL)
         {
             lprintf(LOG_DBUG, "URLFilter: Explanatory note. [line: %d]\n", Count + 1);
             *strstr(Buffer, "#") = '\0';
         }
-        int Part[4];
-        if (sscanf(Buffer, "%d.%d.%d.%d%s", &Part[3], &Part[2], &Part[1], &Part[0], Domain) != 5)
+        /// 超长行且未被注释
+        if (strlen(Buffer) >= (BUFFER_SIZE - 1))
         {
-            lprintf(LOG_WARN, "URLFilter: Invalid rule. [line: %d]\n", Count + 1);
+            lprintf(LOG_WARN, "URLFilter: Invalid rule. (Too long) [line: %d]\n", Count + 1);
             continue;
         }
-        if ((Part[0] | Part[1] | Part[2] | Part[3]) > 255)
+        char IP[BUFFER_SIZE], Domain[BUFFER_SIZE];
         {
-            lprintf(LOG_WARN, "URLFilter: Invalid IP %d.%d.%d.%d. [line: %d]\n", Part[3], Part[2], Part[1], Part[0], Count + 1);
+            int Result = sscanf(Buffer, "%s%s", IP, Domain);
+            if (Result == 0)
+            {
+                continue;
+            }
+            else if (Result != 2 || (strlen(IP) >= IP_BUF_SIZE))
+            {
+                lprintf(LOG_WARN, "URLFilter: Invalid rule. (IP part too long) [line: %d]\n", Count + 1);
+                continue;
+            }
+        }
+        enum QueryType Type;
+        union RecordData Data;
+        if (inet_pton(AF_INET, IP, &Data) == 1)
+        {
+            Type = A;
+        }
+        else if (inet_pton(AF_INET6, IP, &Data) == 1)
+        {
+            Type = AAAA;
+        }
+        else
+        {
+            lprintf(LOG_WARN, "URLFilter: Invalid IP %s not in presentation format) [line: %d]\n", IP, Count + 1);
             continue;
         }
+
+#ifdef _MSC_VER
         _strlwr(Domain);
-#define L1(x) ((x) << 8)
-        union RecordData Data = { .IPv4 = L1(L1(L1(Part[3]) | Part[2]) | Part[1]) | Part[0] };
-#undef L1
-        struct Record* NewRec = RecordNode((enum QueryType)A, Data, Domain);
+#else
+        strlwr(Domain);
+#endif
+        struct Record* NewRec = RecordNode(Type, Data, Domain);
         if (NewRec == NULL)
         {
             lputs(LOG_ERRN, "URLFilter: Releasing the temporary filter...");
@@ -55,22 +85,24 @@ int InitURLFilter(const char* const FileName)
             lputs(LOG_ERRN, "URLFilter: Initializing Failed!");
             return 1;
         }
-        int Return = RecordTableAppend(&Temp, NewRec);
-        if (Return)
         {
-            if (Return < 0)
+            int Return = RecordTableAppend(&Temp, NewRec);
+            if (Return)
             {
-                lputs(LOG_ERRN, "URLFilter: Releasing the temporary filter...");
-                RecordTableClear(&Temp);
-                fclose(RulesFile);
-                lputs(LOG_INFO, "URLFilter: Rule file is closed.");
-                lputs(LOG_ERRN, "URLFilter: Existing rules unchanged.");
-                lputs(LOG_ERRN, "URLFilter: Initializing Failed!");
-                return 1;
+                if (Return < 0)
+                {
+                    lputs(LOG_ERRN, "URLFilter: Releasing the temporary filter...");
+                    RecordTableClear(&Temp);
+                    fclose(RulesFile);
+                    lputs(LOG_INFO, "URLFilter: Rule file is closed.");
+                    lputs(LOG_ERRN, "URLFilter: Existing rules unchanged.");
+                    lputs(LOG_ERRN, "URLFilter: Initializing Failed!");
+                    return 1;
+                }
+                lputs(LOG_WARN, "URLFilter: There're too many rules in the file.");
+                lputs(LOG_WARN, "URLFilter: The system may not work as expected.");
+                break;
             }
-            lputs(LOG_WARN, "URLFilter: There're too many rules in the file.");
-            lputs(LOG_WARN, "URLFilter: The system may not work as expected.");
-            break;
         }
     }
     lprintf(LOG_INFO, "URLFilter: %d rules read from file.", Count);
@@ -78,6 +110,9 @@ int InitURLFilter(const char* const FileName)
     lputs(LOG_INFO, "URLFilter: Rule file is closed.");
     RecordTableClear(&List);
     List = Temp;
+#ifdef USE_BRUTE
+    RecordCheck(&List, NULL);
+#endif
     lputs(LOG_WARN, "URLFilter: Initializing Succeded!");
     return 0;
 }
@@ -112,12 +147,13 @@ int URLCheck(const int Type, const char* const URLString, void* const Dst)
     switch ((enum QueryType)Key.Type)
     {
     case A:
+    case AAAA:
         if (Dst == NULL)
         {
-            Key.Data.IPv4 = -1;
+            Key.Data = RECORD_DATA_MAX;
             break;
         }
-        Key.Data.IPv4 = *(ipv4_t*)Dst;
+        Key.Data = *(union RecordData*)Dst;
         break;
     default:
         lprintf(LOG_WARN, "URLFilter: Unknown query type %d.\n", Type);
@@ -147,7 +183,8 @@ int URLCheck(const int Type, const char* const URLString, void* const Dst)
     switch ((enum QueryType)Key.Type)
     {
     case A:
-        *(ipv4_t*)Dst = Result->Data.IPv4;
+    case AAAA:
+        *(union RecordData*)Dst = Result->Data;
         break;
     default:
         return 1;

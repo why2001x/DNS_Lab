@@ -2,6 +2,8 @@
 
 #include "stdafx.h"
 
+//默认DNS上游
+#define DEFAULTDNS  "10.3.9.5"
 //DNS默认53UDP
 #define PORT 53
 //缓冲区大小

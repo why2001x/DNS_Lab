@@ -3,15 +3,11 @@
 #include "url_filter.h"
 #pragma comment(lib, "ws2_32.lib") //加载 ws2_32.dll
 
-//默认DNS上游
-#define DEFAULTDNS  "10.3.9.5"
-
 //存放上游DNS的IP（如果用户手动输入）
 char dnsServer[64];
 srcInfo idMap[IDMAX];
 packet pack[BUFMAX];
 HANDLE packMutex = NULL;
-
 
 int main(int argc, char* argv[])
 {
