@@ -105,7 +105,7 @@ int InitURLFilter(const char* const FileName)
             }
         }
     }
-    lprintf(LOG_INFO, "URLFilter: %d rules read from file.", Count);
+    lprintf(LOG_INFO, "URLFilter: %d rules read from file.\n", Count);
     fclose(RulesFile);
     lputs(LOG_DBUG, "URLFilter: Rule file is closed.");
     RecordTableClear(&List);

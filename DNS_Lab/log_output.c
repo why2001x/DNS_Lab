@@ -67,7 +67,6 @@ static int LogNotReady(void)
         ReleaseMutex(LogLock);
         return 1;
     }
-    ReleaseMutex(LogLock);
     return 0;
 }
 
@@ -104,10 +103,12 @@ int lprintf(const int WLevel, char const* const Format, ...)
     }
     if (lprefix(WLevel))
     {
+        ReleaseMutex(LogLock);
         return EOF;
     }
     int ret = vfprintf(LogFile, Format, ArgList);
     fflush(LogFile);
+    ReleaseMutex(LogLock);
     return ret;
 }
 
@@ -123,18 +124,22 @@ int lputs(const int WLevel, char const* const Buffer)
     }
     if (lprefix(WLevel))
     {
+        ReleaseMutex(LogLock);
         return EOF;
     }
     int ret = fputs(Buffer, LogFile);
     if (ret < 0)
     {
+        ReleaseMutex(LogLock);
         return ret;
     }
     if (fputc('\n', LogFile))
     {
         fflush(LogFile);
+        ReleaseMutex(LogLock);
         return 0;
     }
+    ReleaseMutex(LogLock);
     return EOF;
 }
 

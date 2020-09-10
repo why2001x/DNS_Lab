@@ -10,6 +10,7 @@
 #include "url_filter.h"
 int main(int argc, char* argv[])
 {
+    SetLogLevel(LOG_INFO);
     srand(time(NULL));
     int ec = 0;
     for (int i = 0; i < (int)1e2; i++)

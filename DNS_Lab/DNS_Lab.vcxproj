@@ -142,7 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="brute_table.c" />
-    <ClCompile Include="crc16.c" />
+    <ClCompile Include="crc16.h" />
     <ClCompile Include="dnsdef.c" />
     <ClCompile Include="getopt.c" />
     <ClCompile Include="hash_table.c" />
