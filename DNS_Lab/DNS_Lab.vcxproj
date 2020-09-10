@@ -142,8 +142,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="brute_table.c" />
+    <ClCompile Include="crc16.c" />
     <ClCompile Include="dnsdef.c" />
     <ClCompile Include="getopt.c" />
+    <ClCompile Include="hash_table.c" />
     <ClCompile Include="log_output.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="record.c" />
@@ -154,6 +156,7 @@
     <ClInclude Include="dnsdef.h" />
     <ClInclude Include="dnsheader.h" />
     <ClInclude Include="getopt.h" />
+    <ClInclude Include="hash_table.h" />
     <ClInclude Include="log_output.h" />
     <ClInclude Include="record.h" />
     <ClInclude Include="record_table.h" />

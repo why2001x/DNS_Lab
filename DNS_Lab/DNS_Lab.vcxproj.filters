@@ -36,6 +36,12 @@
     <ClCompile Include="record.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="hash_table.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="crc16.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="getopt.h">
@@ -63,6 +69,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="record.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="hash_table.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

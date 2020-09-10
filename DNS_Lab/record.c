@@ -77,7 +77,7 @@ int RecordNodeInit(struct Record* const Object, const uchar Type, const union Re
 	char* Temp = (char*)malloc((size_t)Length + 1);
 	if (Temp == NULL)
 	{
-		lputs(LOG_ERRN, "RecordNode: Error while allocating memory for a new Domain!");
+		lputs(LOG_INFO, "RecordNode: Error while allocating memory for a new Domain!");
 		return -1;
 	}
 	strcpy(Temp, Domain);
@@ -92,7 +92,7 @@ int RecordNodeInit(struct Record* const Object, const uchar Type, const union Re
 		Object->Data = Data;
 		break;
 	default:
-		lprintf(LOG_WARN, "RecordNode: Unknown query type %d skipped.\n", Type);
+		lprintf(LOG_INFO, "RecordNode: Unknown query type %d skipped.\n", Type);
 		free(Temp);
 		return 1;
 	}
@@ -108,7 +108,7 @@ struct Record* RecordNode(const uchar Type, const union RecordData Data, const c
 	struct Record* Node = (struct Record*)malloc(sizeof(struct Record));
 	if (Node == NULL)
 	{
-		lputs(LOG_ERRN, "RecordNode: Error while allocating memory for a new Record!");
+		lputs(LOG_INFO, "RecordNode: Error while allocating memory for a new Record!");
 		return NULL;
 	}
 	memset(Node, 0, sizeof(struct Record));

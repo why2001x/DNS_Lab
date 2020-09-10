@@ -20,14 +20,8 @@ extern "C"
      * @{
      */
 
-#ifdef USE_HASH_TRIE
+#ifdef USE_HASH
 #include "hash_table.h"
-    //struct TrieNode
-    //{
-    //    bool HasRec, HasLower;
-    //    struct Record* Rec;
-    //    struct TrieNode* Next[26];
-    //};
     //struct HashTable
     //{
     //    char** String;
@@ -135,4 +129,4 @@ extern "C"
 }
 #endif
 
-#endif // _URL_FILTER_H
+#endif // _RECORD_TABLE_H
