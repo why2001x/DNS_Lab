@@ -42,13 +42,14 @@ int main(int argc, char* argv[])
 	while (1)
 	{
 		parameterPack* tmp = (parameterPack*)malloc(sizeof(parameterPack));
+		tmp->sock = sock;
 
 		tmp->buf = (char*)malloc(sizeof(char) * DNSBUFMAX);
-		memset(tmp->buf, 0, sizeof(tmp->buf));
+		memset(tmp->buf, 0, sizeof(char)*DNSBUFMAX);
 		
 		int len = sizeof(SOCKADDR_IN);
 		//接收包内容，存入缓冲区
-		tmp->packSize = recvfrom(sock, tmp->buf, sizeof(tmp->buf), 0, (SOCKADDR*)&tmp->source, &len);
+		tmp->packSize = recvfrom(sock, tmp->buf, sizeof(char)*DNSBUFMAX, 0, (SOCKADDR*)&tmp->source, &len);
 
 		if (tmp->packSize <= 0)
 			continue;
@@ -267,13 +268,15 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 		char ipBuf[4] = "";
 		//URLCheck：查询类型（enum）、url字符串、查询结果（二进制ip？）
 		//buf[4]==0&buf[5]==1:QDCOUNT=1,即只有一条查询记录时
+		//多线程查询BUG
+		WaitForSingleObject(packMutex, INFINITE);
 		if (URLCheck(A, name, ipBuf) && tmp->buf[4] == 0 && tmp->buf[5] == 1) // 存在本地文件中
 		{
 			//直接发回自构建返回包
 			tmp->packSize = makePack(tmp->buf, tmp->packSize, ipBuf);
 
 			//等待线程锁
-			WaitForSingleObject(packMutex, INFINITE);
+			//WaitForSingleObject(packMutex, INFINITE);
 			//获得锁后遍历缓冲区
 			for (int i = 0; i < BUFMAX; i++)
 			{
@@ -296,6 +299,7 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 		}
 		else // 不存在本地文件中，则转发上游
 		{
+			ReleaseMutex(packMutex);
 			//改目标地址为上游服务器
 			inet_pton(AF_INET, dnsServer, &dest.sin_addr.S_un.S_addr);
 			dest.sin_port = htons(53);
