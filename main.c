@@ -3,9 +3,6 @@
 #include "url_filter.h"
 #pragma comment(lib, "ws2_32.lib") //加载 ws2_32.dll
 
-//默认DNS上游
-#define DEFAULTDNS  "10.3.9.5"
-
 //存放上游DNS的IP（如果用户手动输入）
 char dnsServer[64];
 srcInfo idMap[IDMAX];
@@ -44,17 +41,20 @@ int main(int argc, char* argv[])
 	//循环等待接受数据包
 	while (1)
 	{
-		char buf[512];
-		memset(buf, 0, sizeof(buf));
-		int len = sizeof(SOCKADDR_IN);
-		SOCKADDR_IN source;
-		//接收包内容，存入缓冲区
-		int packSize = recvfrom(sock, buf, sizeof(buf), 0, (SOCKADDR*)&source, &len);
+		parameterPack* tmp = (parameterPack*)malloc(sizeof(parameterPack));
 
-		if (packSize <= 0)
+		tmp->buf = (char*)malloc(sizeof(char) * DNSBUFMAX);
+		memset(tmp->buf, 0, sizeof(tmp->buf));
+		
+		int len = sizeof(SOCKADDR_IN);
+		//接收包内容，存入缓冲区
+		tmp->packSize = recvfrom(sock, tmp->buf, sizeof(tmp->buf), 0, (SOCKADDR*)&tmp->source, &len);
+
+		if (tmp->packSize <= 0)
 			continue;
+		
 		//处理接受到的包，并将缓冲区指针、sockaddr传出
-		dealPacket(buf, packSize, source, sock);
+		CreateThread(NULL, 0, dealPacket, tmp, 0, NULL);
 	}
 
 	closesocket(sock);
@@ -231,9 +231,11 @@ DWORD WINAPI threadSend(LPVOID lpParamter)
 	return 0L;
 }
 
-void dealPacket(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)
+DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)*/
 {
-	char* tmp = buf;
+	//获取参数包
+	parameterPack* tmp = (parameterPack*)lpParamter;
+	
 	//id转换
 	unsigned short outID = 0;
 
@@ -242,34 +244,33 @@ void dealPacket(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)
 	dest.sin_family = AF_INET;
 	//buf[2]为包头第三个字节
 	//0x80;1000 0000，包头与其and,则取出最高位。最高位为QR，按其0、1分为查询与响应
-	if ((buf[2] & 0x80) == 0) // 如果是查询报文的话
+	if ((tmp->buf[2] & 0x80) == 0) // 如果是查询报文的话
 	{
-		//dnsHeader dnsHead = dealDNSHeader(buf);
 
 		//单查询，多查询尚未加入
 
 		//取出域名字段
-		char name[512] = { 0 };
+		char name[DNSBUFMAX] = { 0 };
 		//i=12:正文的QNAME字段
-		for (int i = 12; i < packSize;)
+		for (int i = 12; i < tmp->packSize;)
 		{
-			if (tmp[i] == 0)
+			if (tmp->buf[i] == 0)
 				break;
-			int cnt = (int)tmp[i] + i + 1;
+			int cnt = (int)tmp->buf[i] + i + 1;
 			for (i++; i < cnt; i++)
 				//strlen:位置为首个值为0处，会随字符串内容更新而更新
-				name[strlen(name)] = tmp[i];
-			if (tmp[i] != 0)
+				name[strlen(name)] = tmp->buf[i];
+			if (tmp->buf[i] != 0)
 				name[strlen(name)] = '.';
 		}
 
 		char ipBuf[4] = "";
 		//URLCheck：查询类型（enum）、url字符串、查询结果（二进制ip？）
 		//buf[4]==0&buf[5]==1:QDCOUNT=1,即只有一条查询记录时
-		if (URLCheck(A, name, ipBuf) && buf[4] == 0 && buf[5] == 1) // 存在本地文件中
+		if (URLCheck(A, name, ipBuf) && tmp->buf[4] == 0 && tmp->buf[5] == 1) // 存在本地文件中
 		{
 			//直接发回自构建返回包
-			packSize = makePack(buf, packSize, ipBuf);
+			tmp->packSize = makePack(tmp->buf, tmp->packSize, ipBuf);
 
 			//等待线程锁
 			WaitForSingleObject(packMutex, INFINITE);
@@ -283,10 +284,10 @@ void dealPacket(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)
 					pack[i].type = 1;
 
 					//成包
-					pack[i].size = packSize;
-					pack[i].dest = source;
-					for (int j = 0; j < packSize; j++)
-						pack[i].buf[j] = buf[j];
+					pack[i].size = tmp->packSize;
+					pack[i].dest = tmp->source;
+					for (int j = 0; j < tmp->packSize; j++)
+						pack[i].buf[j] = tmp->buf[j];
 					break;
 				}
 			}
@@ -300,12 +301,12 @@ void dealPacket(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)
 			dest.sin_port = htons(53);
 
 			//outID默认为零，需要查找可用的可转换ID再发出
-			outID = encodeID(source, buf);
+			outID = encodeID(tmp->source, tmp->buf);
 			while (!outID)
 			{
 				//得到一个可用的转换id
 				Sleep(50);
-				outID = encodeID(source, buf);
+				outID = encodeID(tmp->source, tmp->buf);
 			}
 
 
@@ -316,15 +317,15 @@ void dealPacket(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)
 				if (pack[i].type == 0)
 				{
 					pack[i].type = 1;
-					pack[i].size = packSize;
+					pack[i].size = tmp->packSize;
 					pack[i].dest = dest;
 
 					//准备Transaction ID
 					pack[i].buf[0] = (char)(outID >> 8);
 					pack[i].buf[1] = (char)(outID & 0xff);
 					//TID之后将包塞入
-					for (int j = 2; j < packSize; j++)
-						pack[i].buf[j] = buf[j];
+					for (int j = 2; j < tmp->packSize; j++)
+						pack[i].buf[j] = tmp->buf[j];
 					break;
 				}
 			}
@@ -333,8 +334,8 @@ void dealPacket(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)
 	}
 	else //响应报文
 	{
-		//取回ID
-		outID = (((unsigned short)buf[0]) << 8) + (unsigned short)buf[1];
+		//取回ID,unsigned char待修改
+		outID = (((unsigned short)(unsigned char)tmp->buf[0]) << 8) + (unsigned short)(unsigned char)tmp->buf[1];
 		//由返回ID反查之前的ID
 		if (idMap[outID].flag == 0)
 		{
@@ -352,17 +353,23 @@ void dealPacket(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)
 				if (pack[i].type == 0)
 				{
 					pack[i].type = 1;
-					pack[i].size = packSize;
+					pack[i].size = tmp->packSize;
 					pack[i].dest = idMap[outID].procInfo;
 
 					pack[i].buf[0] = idMap[outID].buf0;
 					pack[i].buf[1] = idMap[outID].buf1;
-					for (int j = 2; j < packSize; j++)
-						pack[i].buf[j] = buf[j];
+					for (int j = 2; j < tmp->packSize; j++)
+						pack[i].buf[j] = tmp->buf[j];
 					break;
 				}
 			}
 			ReleaseMutex(packMutex);
 		}
 	}
+
+	//释放动态申请内存
+	free(tmp->buf);
+	free(tmp);
+
+	return 0L;
 }
