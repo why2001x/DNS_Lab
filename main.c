@@ -8,6 +8,7 @@ char dnsServer[64];
 srcInfo idMap[IDMAX];
 packet pack[BUFMAX];
 HANDLE packMutex = NULL;
+HANDLE hostMutex = NULL;
 
 
 int main(int argc, char* argv[])
@@ -33,6 +34,7 @@ int main(int argc, char* argv[])
 		idMap[i].flag = 0;
 	//pack线程锁
 	packMutex = CreateMutex(NULL, FALSE, NULL);
+	hostMutex = CreateMutex(NULL, FALSE, NULL);
 	//开启服务端Listenning线程，将发送与接受分为两个线程处理
 	CreateThread(NULL, 0, threadSend, &sock, 0, NULL);
 
@@ -45,15 +47,15 @@ int main(int argc, char* argv[])
 		tmp->sock = sock;
 
 		tmp->buf = (char*)malloc(sizeof(char) * DNSBUFMAX);
-		memset(tmp->buf, 0, sizeof(char)*DNSBUFMAX);
-		
+		memset(tmp->buf, 0, sizeof(char) * DNSBUFMAX);
+
 		int len = sizeof(SOCKADDR_IN);
 		//接收包内容，存入缓冲区
-		tmp->packSize = recvfrom(sock, tmp->buf, sizeof(char)*DNSBUFMAX, 0, (SOCKADDR*)&tmp->source, &len);
+		tmp->packSize = recvfrom(sock, tmp->buf, sizeof(char) * DNSBUFMAX, 0, (SOCKADDR*)&tmp->source, &len);
 
 		if (tmp->packSize <= 0)
 			continue;
-		
+
 		//处理接受到的包，并将缓冲区指针、sockaddr传出
 		CreateThread(NULL, 0, dealPacket, tmp, 0, NULL);
 	}
@@ -236,7 +238,7 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 {
 	//获取参数包
 	parameterPack* tmp = (parameterPack*)lpParamter;
-	
+
 	//id转换
 	unsigned short outID = 0;
 
@@ -269,8 +271,12 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 		//URLCheck：查询类型（enum）、url字符串、查询结果（二进制ip？）
 		//buf[4]==0&buf[5]==1:QDCOUNT=1,即只有一条查询记录时
 		//多线程查询BUG
-		WaitForSingleObject(packMutex, INFINITE);
-		if (URLCheck(A, name, ipBuf) && tmp->buf[4] == 0 && tmp->buf[5] == 1) // 存在本地文件中
+
+		WaitForSingleObject(hostMutex, INFINITE);
+		int result = URLCheck(A, name, ipBuf);
+		ReleaseMutex(hostMutex);
+
+		if (result && tmp->buf[4] == 0 && tmp->buf[5] == 1) // 存在本地文件中
 		{
 			//直接发回自构建返回包
 			tmp->packSize = makePack(tmp->buf, tmp->packSize, ipBuf);
@@ -278,6 +284,7 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 			//等待线程锁
 			//WaitForSingleObject(packMutex, INFINITE);
 			//获得锁后遍历缓冲区
+			WaitForSingleObject(packMutex, INFINITE);
 			for (int i = 0; i < BUFMAX; i++)
 			{
 				//找到了缓冲区中空闲可用的包结构体
