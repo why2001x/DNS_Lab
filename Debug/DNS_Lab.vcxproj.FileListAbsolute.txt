@@ -1,2 +1,0 @@
-C:\Users\ExtHardware\Desktop\DNS_Lab\Debug\DNS_Lab.exe
-C:\Users\ExtHardware\Desktop\DNS_Lab\Debug\DNS_Lab.pdb
