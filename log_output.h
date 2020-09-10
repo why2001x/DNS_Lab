@@ -21,8 +21,8 @@ extern "C"
      * @{
      */
 
-/// @brief 最严重级别
-/// @warning 此类错误很少使用，输出此类错误后应立即结束相关进程
+     /// @brief 最严重级别
+     /// @warning 此类错误很少使用，输出此类错误后应立即结束相关进程
 #define LOG_CRNT (1)
 #define LOG_CRITICAL LOG_CRNT
 
