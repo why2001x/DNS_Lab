@@ -8,23 +8,18 @@ char dnsServer[64];
 srcInfo idMap[IDMAX];
 packet pack[BUFMAX];
 HANDLE packMutex = NULL;
-HANDLE hostMutex = NULL;
-
+unsigned int index;
 
 int main(int argc, char* argv[])
 {
 	//TODO::命令行参数
+	SetLogLevel(LOG_INFO);
 	InitLog(NULL);
 	InitURLFilter("dnsrelay.txt");
 
 	getServer(); //输入外部DNS
-	if (initWSA())
-		exit(1); //初始化WSA
 	SOCKET sock;
-	if (createSocket(&sock))
-		exit(1); //创建套接字
-	if (bindSocketAddr(sock))
-		exit(1); //绑定套接字
+	initSocket(&sock);//初始化socket
 
 	//初始化pack数组为空闲状态
 	for (int i = 0; i < BUFMAX; i++)
@@ -34,7 +29,6 @@ int main(int argc, char* argv[])
 		idMap[i].flag = 0;
 	//pack线程锁
 	packMutex = CreateMutex(NULL, FALSE, NULL);
-	hostMutex = CreateMutex(NULL, FALSE, NULL);
 	//开启服务端Listenning线程，将发送与接受分为两个线程处理
 	CreateThread(NULL, 0, threadSend, &sock, 0, NULL);
 
@@ -92,34 +86,30 @@ void getServer()
 	}
 	return;
 }
-int initWSA()
+//初始化socket
+void initSocket(SOCKET* sock)
 {
+	//初始化WSA
 	WSADATA WSA;
 	if (WSAStartup(MAKEWORD(2, 2), &WSA) != 0)
 	{
 		printf("Failed to initialize Winsock!\n");
-		return 1;
+		exit(1);
 	}
-	return 0;
-}
-int createSocket(SOCKET* sock)
-{
+	
 	//开启UDP Socket
 	SOCKET tmpSock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (tmpSock == INVALID_SOCKET)
 	{
 		printf("Creating socket failed!\n");
 		WSACleanup();
-		return 1;
+		exit(1);
 	}
 	else
 	{
 		*sock = tmpSock;
-		return 0;
 	}
-}
-int bindSocketAddr(SOCKET sock)
-{
+
 	//bind监听地址、端口为0.0.0.0、53
 	SOCKADDR_IN serverAddr;
 	memset(&serverAddr, 0, sizeof(serverAddr));
@@ -128,17 +118,17 @@ int bindSocketAddr(SOCKET sock)
 	serverAddr.sin_port = htons(PORT);
 	//监听地址，绑定为0.0.0.0，并字节序转换
 	inet_pton(AF_INET, "0.0.0.0", &serverAddr.sin_addr.S_un.S_addr);
-	if (bind(sock, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+	if (bind(*sock, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
 	{
 		printf("Binding socket failed!\n");
-		return 1;
+		exit(1);
 	}
 
 	puts("Binding socket Success!");
 
-	return 0;
+	return;
 }
-
+//内外ID转换
 unsigned short encodeID(SOCKADDR_IN src, char* buf)
 {
 	for (int i = 1; i < IDMAX; ++i)
@@ -233,7 +223,7 @@ DWORD WINAPI threadSend(LPVOID lpParamter)
 	}
 	return 0L;
 }
-
+//处理报文，准备发送
 DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)*/
 {
 	//获取参数包
@@ -245,20 +235,23 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 	//目标地址
 	SOCKADDR_IN dest;
 	dest.sin_family = AF_INET;
+
 	//buf[2]为包头第三个字节
 	//0x80;1000 0000，包头与其and,则取出最高位。最高位为QR，按其0、1分为查询与响应
 	if ((tmp->buf[2] & 0x80) == 0) // 如果是查询报文的话
-	{
-
-		//单查询，多查询尚未加入
-
-		//取出域名字段
+	{		
+		//取出域名
 		char name[DNSBUFMAX] = { 0 };
+		int type = 1;
 		//i=12:正文的QNAME字段
 		for (int i = 12; i < tmp->packSize;)
 		{
 			if (tmp->buf[i] == 0)
+			{
+				//取出查询类型
+				type = (int)(unsigned char)tmp->buf[i + 1] + (int)(unsigned char)tmp->buf[i + 2];
 				break;
+			}
 			int cnt = (int)tmp->buf[i] + i + 1;
 			for (i++; i < cnt; i++)
 				//strlen:位置为首个值为0处，会随字符串内容更新而更新
@@ -267,15 +260,12 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 				name[strlen(name)] = '.';
 		}
 
+		lprintf(LOG_INFO,"%8d: Type %02d, Name: %s\n",++index,type,name);
+
 		char ipBuf[4] = "";
 		//URLCheck：查询类型（enum）、url字符串、查询结果（二进制ip？）
 		//buf[4]==0&buf[5]==1:QDCOUNT=1,即只有一条查询记录时
-		//多线程查询BUG
-
-		//WaitForSingleObject(hostMutex, INFINITE);
 		int result = URLCheck(A, name, ipBuf);
-		//ReleaseMutex(hostMutex);
-
 		if (result && tmp->buf[4] == 0 && tmp->buf[5] == 1) // 存在本地文件中
 		{
 			//直接发回自构建返回包

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include "dnsdef.h"
 
 //DNS报文长度
 #define DNSBUFMAX 512
@@ -38,11 +39,8 @@ typedef struct parameterPack
 }parameterPack;
 
 void getServer();
-int initWSA();
-int createSocket(SOCKET*);
-int bindSocketAddr(SOCKET);
+void initSocket(SOCKET*);
 unsigned short encodeID(SOCKADDR_IN, char*);
+int makePack(char*, int, char*);
 DWORD WINAPI threadSend(LPVOID);
 DWORD WINAPI dealPacket(LPVOID);
-//void dealPacket(char*, int, SOCKADDR_IN, SOCKET);
-int makePack(char*, int, char*);
