@@ -287,7 +287,7 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 			if (tmp->buf[i] == 0)
 			{
 				//取出查询类型
-				type = (int)(unsigned char)tmp->buf[i + 1] + (int)(unsigned char)tmp->buf[i + 2];
+				type = (((int)(unsigned char)tmp->buf[i + 1]) << 8) + (int)(unsigned char)tmp->buf[i + 2];
 				break;
 			}
 			int cnt = (int)tmp->buf[i] + i + 1;
@@ -298,19 +298,11 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 				name[strlen(name)] = '.';
 		}
 
-		WaitForSingleObject(logMutex, INFINITE);
-		lprintf(LOG_INFO, "%8d: Type %02d, Name: %s\n", ++index, type, name);
-		lprintf(LOG_DEBUG, "          ID %04x QR %d Opcode %x AA %d TC %d RD %d RA %d RCODE %x\nQDCOUNT %d ANCOUNT %d NSCOUNT %d ARCOUNT %d\n",
-			headInfo.ID, headInfo.QR, headInfo.Opcode, headInfo.AA,
-			headInfo.TC, headInfo.RD, headInfo.RA, headInfo.RCODE,
-			headInfo.QDCOUNT, headInfo.ANCOUNT, headInfo.NSCOUNT, headInfo.ARCOUNT);
-		ReleaseMutex(logMutex);
-
 		char ipBuf[4] = "";
 		//URLCheck：查询类型（enum）、url字符串、查询结果（二进制ip？）
 		//buf[4]==0&buf[5]==1:QDCOUNT=1,即只有一条查询记录时
 		int result = URLCheck(A, name, ipBuf);
-		if (result && tmp->buf[4] == 0 && tmp->buf[5] == 1) // 存在本地文件中
+		if (result && (type == 1 || ipBuf[0] == 0) && tmp->buf[4] == 0 && tmp->buf[5] == 1) // 存在本地文件中
 		{
 			//直接发回自构建返回包
 			tmp->packSize = makePack(tmp->buf, tmp->packSize, ipBuf);
@@ -374,6 +366,14 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 			}
 			ReleaseMutex(packMutex);
 		}
+
+		WaitForSingleObject(logMutex, INFINITE);
+		lprintf(LOG_INFO, "%8d: Type %02d, Name: %s\n", ++index, type, name);
+		lprintf(LOG_DEBUG, "         ID %04x QR %d Opcode %x AA %d TC %d RD %d RA %d RCODE %x\n                                    QDCOUNT %d ANCOUNT %d NSCOUNT %d ARCOUNT %d\n",
+			headInfo.ID, headInfo.QR, headInfo.Opcode, headInfo.AA,
+			headInfo.TC, headInfo.RD, headInfo.RA, headInfo.RCODE,
+			headInfo.QDCOUNT, headInfo.ANCOUNT, headInfo.NSCOUNT, headInfo.ARCOUNT);
+		ReleaseMutex(logMutex);
 	}
 	else //响应报文
 	{
@@ -408,6 +408,13 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 			}
 			ReleaseMutex(packMutex);
 		}
+
+		WaitForSingleObject(logMutex, INFINITE);
+		lprintf(LOG_DEBUG, "%7d: ID %04x QR %d Opcode %x AA %d TC %d RD %d RA %d RCODE %x\n                                    QDCOUNT %d ANCOUNT %d NSCOUNT %d ARCOUNT %d\n",
+			++index, headInfo.ID, headInfo.QR, headInfo.Opcode, headInfo.AA,
+			headInfo.TC, headInfo.RD, headInfo.RA, headInfo.RCODE,
+			headInfo.QDCOUNT, headInfo.ANCOUNT, headInfo.NSCOUNT, headInfo.ARCOUNT);
+		ReleaseMutex(logMutex);
 	}
 
 	//释放动态申请内存
