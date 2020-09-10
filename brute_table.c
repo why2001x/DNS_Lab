@@ -157,6 +157,10 @@ struct Record* const BruteTableCheck(struct BruteTable* const Object, struct Rec
         Object->Ready = true;
     }
     struct Record** Pos = BruteTableBSearch(Key, Object->Data, Object->End, RecordFindComp);
+    if (Pos == NULL)
+    {
+        return NULL;
+    }
     switch ((enum QueryType)Key->Type)
     {
     case A:

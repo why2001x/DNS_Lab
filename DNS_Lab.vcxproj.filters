@@ -65,5 +65,8 @@
     <ClInclude Include="record.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="declare.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

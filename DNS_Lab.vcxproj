@@ -151,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brute_table.h" />
+    <ClInclude Include="declare.h" />
     <ClInclude Include="dnsdef.h" />
     <ClInclude Include="dnsheader.h" />
     <ClInclude Include="getopt.h" />

@@ -21,6 +21,8 @@
 #include "getopt.h"
 
 #if defined(_MSC_VER) or defined(_WIN32)
+#include "Winsock2.h"
+#include "WS2tcpip.h"
 #include "windows.h"
 #endif // _MSC_VER
 
