@@ -198,10 +198,10 @@ int makePack(char* buf, int size, char* ip)
 	buf[size + 11] = 0x04;
 
 	// RDATA：返回查询的ip结果
-	buf[size + 12] = ip[3];
-	buf[size + 13] = ip[2];
-	buf[size + 14] = ip[1];
-	buf[size + 15] = ip[0];
+	buf[size + 12] = ip[0];
+	buf[size + 13] = ip[1];
+	buf[size + 14] = ip[2];
+	buf[size + 15] = ip[3];
 
 	return size + 16;
 }
@@ -272,9 +272,9 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 		//buf[4]==0&buf[5]==1:QDCOUNT=1,即只有一条查询记录时
 		//多线程查询BUG
 
-		WaitForSingleObject(hostMutex, INFINITE);
+		//WaitForSingleObject(hostMutex, INFINITE);
 		int result = URLCheck(A, name, ipBuf);
-		ReleaseMutex(hostMutex);
+		//ReleaseMutex(hostMutex);
 
 		if (result && tmp->buf[4] == 0 && tmp->buf[5] == 1) // 存在本地文件中
 		{
@@ -306,7 +306,6 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 		}
 		else // 不存在本地文件中，则转发上游
 		{
-			ReleaseMutex(packMutex);
 			//改目标地址为上游服务器
 			inet_pton(AF_INET, dnsServer, &dest.sin_addr.S_un.S_addr);
 			dest.sin_port = htons(53);
