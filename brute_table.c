@@ -51,7 +51,7 @@ int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
         /// 判断表记录数是否到达约定上限
         if (Object->Size >= MAX_SIZE)
         {
-            lputs(LOG_WARN, "BruteTable: The number of rules more than the limit! Skipped.");
+            lputs(LOG_INFO, "BruteTable: The number of rules more than the limit! Skipped.");
             return 1;
         }
         /// 初始化新表
@@ -60,7 +60,7 @@ int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
         Temp.Data = (struct Record**)malloc(Temp.Size * sizeof(struct Record*));
         if (Temp.Data == NULL)
         {
-            lputs(LOG_ERRN, "BruteTable: Error while allocating memory!");
+            lputs(LOG_INFO, "BruteTable: Error while allocating memory!");
             return -1;
         }
         memset(Temp.Data, 0, Temp.Size * sizeof(struct Record*));

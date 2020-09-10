@@ -1,23 +1,24 @@
 #include "declare.h"
 #include "log_output.h"
 #include "url_filter.h"
+#include "getopt.h"
+#include "dnsHeader.h"
 #pragma comment(lib, "ws2_32.lib") //加载 ws2_32.dll
 
 //存放上游DNS的IP（如果用户手动输入）
-char dnsServer[64];
+char host[128] = DEFAULTHOST;
+char dnsServer[64] = DEFAULTDNS;
 srcInfo idMap[IDMAX];
 packet pack[BUFMAX];
 HANDLE packMutex = NULL;
-unsigned int index;
+HANDLE logMutex = NULL;
+unsigned int index = 0;
 
 int main(int argc, char* argv[])
 {
-	//TODO::命令行参数
-	SetLogLevel(LOG_INFO);
-	InitLog(NULL);
-	InitURLFilter("dnsrelay.txt");
+	argRes(argc, argv);
+	InitURLFilter(host);
 
-	getServer(); //输入外部DNS
 	SOCKET sock;
 	initSocket(&sock);//初始化socket
 
@@ -29,6 +30,7 @@ int main(int argc, char* argv[])
 		idMap[i].flag = 0;
 	//pack线程锁
 	packMutex = CreateMutex(NULL, FALSE, NULL);
+	logMutex = CreateMutex(NULL, FALSE, NULL);
 	//开启服务端Listenning线程，将发送与接受分为两个线程处理
 	CreateThread(NULL, 0, threadSend, &sock, 0, NULL);
 
@@ -59,34 +61,49 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-void getServer()
-{
-	//按用户选择指定的DNS上游，否则使用默认DNS
-	printf("Choose your DNS server(input -1 to skip):\n");
-	//读入用户DNS
-	scanf_s("%s", dnsServer, sizeof(dnsServer));
-	if (strcmp(dnsServer, "-1") == 0)
+void argRes(int argc, char* argv[]) {
+	int ch;
+	//verbose normal server filename
+	while ((ch = getopt(argc, argv, "dDs:f:")) != -1)
 	{
-		//默认情况
-		strcpy_s(dnsServer, sizeof(dnsServer), DEFAULTDNS);
-	}
-	else
-	{
-		unsigned long tmp;
-		//将点分文本的IP地址转换为二进制网络字节序”的IP地址，判断IP是否合法
-		//参数：IPv4类型、点分文本的IP地址
-		int flag = inet_pton(AF_INET, dnsServer, &tmp);
-		//非法时
-		if (flag < 1)
+		printf("optind: %d\n", optind);
+		switch (ch)
 		{
-			printf("Error! Enable default server.\n");
-			//应用默认DNS
-			strcpy_s(dnsServer, sizeof(dnsServer), DEFAULTDNS);
+			//普通log
+		case 'd':
+			SetLogLevel(LOG_INFO);
+			printf("HAVE option: -d\n\n");
+			break;
+		case 'D':
+			//详细log
+			SetLogLevel(LOG_DEBUG);
+			printf("HAVE option: -D\n");
+			break;
+		case 's':
+			//指定上游服务器
+			memcpy(dnsServer, optarg, strlen(optarg));
+			printf("HAVE option: -s\n");
+			printf("The argument of -s is %s\n\n", optarg);
+			break;
+		case 'f':
+			//指定host
+			printf("HAVE option: -f\n");
+			printf("The argument of -f is %s\n\n", optarg);
+			InitURLFilter(optarg);
+			break;
+		default:
+			printf("Illegal Parameters.\n");
+		case 'h':
+			printf("-h :Help\n");
+			printf("-d :Brief Log\n");
+			printf("-D :Verbose Log\n");
+			printf("-s :DNS Upstream Server IP\n");
+			printf("-f :Host File Dir\n");
+			break;
 		}
 	}
-	return;
 }
-//初始化socket
+
 void initSocket(SOCKET* sock)
 {
 	//初始化WSA
@@ -96,7 +113,7 @@ void initSocket(SOCKET* sock)
 		printf("Failed to initialize Winsock!\n");
 		exit(1);
 	}
-	
+
 	//开启UDP Socket
 	SOCKET tmpSock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (tmpSock == INVALID_SOCKET)
@@ -127,6 +144,24 @@ void initSocket(SOCKET* sock)
 	puts("Binding socket Success!");
 
 	return;
+}
+//获取DNS报头
+dnsHeader getHeader(char* buf)
+{
+	dnsHeader ret;
+	ret.ID = (((unsigned short)(unsigned char)buf[0]) >> 8) + (unsigned short)(unsigned char)buf[1];
+	ret.QR = buf[2] & 0x80;
+	ret.Opcode = buf[2] & 0x78;
+	ret.AA = buf[2] & 0x04;
+	ret.TC = buf[2] & 0x02;
+	ret.RD = buf[2] & 0x01;
+	ret.RA = buf[3] & 0x80;
+	ret.RCODE = buf[3] & 0x08;
+	ret.QDCOUNT = (((unsigned short)(unsigned char)buf[4]) >> 8) + (unsigned short)(unsigned char)buf[5];
+	ret.ANCOUNT = (((unsigned short)(unsigned char)buf[6]) >> 8) + (unsigned short)(unsigned char)buf[7];
+	ret.NSCOUNT = (((unsigned short)(unsigned char)buf[8]) >> 8) + (unsigned short)(unsigned char)buf[9];
+	ret.ARCOUNT = (((unsigned short)(unsigned char)buf[10]) >> 8) + (unsigned short)(unsigned char)buf[11];
+	return ret;
 }
 //内外ID转换
 unsigned short encodeID(SOCKADDR_IN src, char* buf)
@@ -229,6 +264,9 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 	//获取参数包
 	parameterPack* tmp = (parameterPack*)lpParamter;
 
+	//获取DNS头信息
+	dnsHeader headInfo = getHeader(tmp->buf);
+
 	//id转换
 	unsigned short outID = 0;
 
@@ -239,7 +277,7 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 	//buf[2]为包头第三个字节
 	//0x80;1000 0000，包头与其and,则取出最高位。最高位为QR，按其0、1分为查询与响应
 	if ((tmp->buf[2] & 0x80) == 0) // 如果是查询报文的话
-	{		
+	{
 		//取出域名
 		char name[DNSBUFMAX] = { 0 };
 		int type = 1;
@@ -260,7 +298,13 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 				name[strlen(name)] = '.';
 		}
 
-		lprintf(LOG_INFO,"%8d: Type %02d, Name: %s\n",++index,type,name);
+		WaitForSingleObject(logMutex, INFINITE);
+		lprintf(LOG_INFO, "%8d: Type %02d, Name: %s\n", ++index, type, name);
+		lprintf(LOG_DEBUG, "          ID %04x QR %d Opcode %x AA %d TC %d RD %d RA %d RCODE %x\nQDCOUNT %d ANCOUNT %d NSCOUNT %d ARCOUNT %d\n",
+			headInfo.ID, headInfo.QR, headInfo.Opcode, headInfo.AA,
+			headInfo.TC, headInfo.RD, headInfo.RA, headInfo.RCODE,
+			headInfo.QDCOUNT, headInfo.ANCOUNT, headInfo.NSCOUNT, headInfo.ARCOUNT);
+		ReleaseMutex(logMutex);
 
 		char ipBuf[4] = "";
 		//URLCheck：查询类型（enum）、url字符串、查询结果（二进制ip？）
@@ -308,7 +352,6 @@ DWORD WINAPI dealPacket(LPVOID lpParamter)/*(char* buf, int packSize, SOCKADDR_I
 				Sleep(50);
 				outID = encodeID(tmp->source, tmp->buf);
 			}
-
 
 			//大致同上步，准备发送缓冲
 			WaitForSingleObject(packMutex, INFINITE);

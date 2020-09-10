@@ -13,6 +13,7 @@
 #define IDMAX 65536
 //默认DNS上游
 #define DEFAULTDNS  "10.3.9.5"
+#define DEFAULTHOST "dnsrelay.txt"
 
 //包结构体，用于之后开启数组，方便进行包的管理
 typedef struct packet
@@ -38,8 +39,9 @@ typedef struct parameterPack
     SOCKET sock;
 }parameterPack;
 
-void getServer();
+void argRes(int, char*);
 void initSocket(SOCKET*);
+dnsHeader getHeader(char*);
 unsigned short encodeID(SOCKADDR_IN, char*);
 int makePack(char*, int, char*);
 DWORD WINAPI threadSend(LPVOID);

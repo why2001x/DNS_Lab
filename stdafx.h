@@ -19,14 +19,10 @@ extern "C"
 #include "stdarg.h"
 #include "stdbool.h"
 #include "stdio.h"
+#include "stdint.h"
 #include "stdlib.h"
 #include "string.h"
 #include "time.h"
-#ifdef _MSC_VER
-//#include "xthreads.h"
-#else
-#include "threads.h"
-#endif
 
 #include "getopt.h"
 

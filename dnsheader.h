@@ -41,7 +41,7 @@ extern "C" {
 
 
 
-	struct header {
+	typedef struct dnsHeader {
 		unsigned short ID;
 		unsigned char QR : 1;
 		unsigned char Opcode : 4;
@@ -55,7 +55,7 @@ extern "C" {
 		unsigned short ANCOUNT;
 		unsigned short NSCOUNT;
 		unsigned short ARCOUNT;
-	};
+	}dnsHeader;
 
 #ifdef __cplusplus
 }

@@ -6,19 +6,18 @@
 
 static FILE* LogFile;
 
-static int LogLevel = LOG_WARN;
+static int LogLevel = LOG_OFF;
 
 static bool Ready;
 
-int InitLog(const char FileName[])
+int InitLog(FILE* Dst)
 {
-    static const char Default[] = "./log.txt";
-    if (!FileName || !(*FileName))
+    if (Dst == NULL)
     {
-        fputs("Using the default log file.\n", stderr);
-        FileName = Default;
+        fputs("Using stderr for log.\n", stderr);
+        Dst = stderr;
     }
-    if (LogFile)
+    if (LogFile && LogFile != stderr)
     {
         fputs("Try to restart the log service.\n", stderr);
         switch (fclose(LogFile))
@@ -38,11 +37,7 @@ int InitLog(const char FileName[])
             return 1;
         }
     }
-    if ((LogFile = fopen(FileName, "a")) == NULL)
-    {
-        fputs("Unable to open the specified LogFile!\n", stderr);
-        return 1;
-    }
+    LogFile = stderr;
     Ready = true;
     return 0;
 }
