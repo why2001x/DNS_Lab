@@ -315,11 +315,12 @@ void dealPacket(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)
             dest.sin_port = htons(53);
 
             //outID默认为零，需要查找可用的可转换ID再发出
+            outID = encodeID(source, buf);
             while (!outID)
             {
                 //得到一个可用的转换id
-                outID = encodeID(source, buf);
                 Sleep(50);
+                outID = encodeID(source, buf);
             }
 
 
