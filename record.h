@@ -25,7 +25,9 @@ extern "C"
     union RecordData
     {
         ipv4_t IPv4;
+        ipv6_t IPv6;
     };
+    extern const union RecordData RECORD_DATA_MAX;
 
     /// 单条记录
     struct Record

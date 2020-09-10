@@ -7,6 +7,11 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -17,13 +22,19 @@
 #include "stdlib.h"
 #include "string.h"
 #include "time.h"
+#ifdef _MSC_VER
+//#include "xthreads.h"
+#else
+#include "threads.h"
+#endif
 
 #include "getopt.h"
 
 #if defined(_MSC_VER) or defined(_WIN32)
-#include "Winsock2.h"
-#include "WS2tcpip.h"
-#include "windows.h"
+#include "WinSock2.h"
+#include "Ws2tcpip.h"
+#include "Windows.h"
+#pragma comment(lib,"Ws2_32.lib")
 #endif // _MSC_VER
 
 
@@ -33,6 +44,9 @@
 #undef NOP
 #endif // NOP
 
-// #define NO_LOG_SERVICE
+    // #define NO_LOG_SERVICE
 
+#ifdef __cplusplus
+}
+#endif
 #endif // STDAFX_H

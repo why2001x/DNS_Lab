@@ -24,7 +24,14 @@ extern "C"
      */
 
      /// 输入缓冲区长度限制
-#define BUFFER_SIZE 300
+#define BUFFER_SIZE (1 << 10 | 1)
+
+    /// IP点分文本最大长度
+#ifndef INET6_ADDRSTRLEN
+#define IP_BUF_SIZE 65
+#else
+#define IP_BUF_SIZE INET6_ADDRSTRLEN
+#endif
 
     /**
      * @brief URL过滤器初始化
@@ -33,7 +40,7 @@ extern "C"
      * 应至少进行一次初始化
      * 以获得预期的过滤效果
      *
-     * @warning 仅支持纯ASCII文件
+     * @warning 仅支持纯ASCII记录
      *
      * @param FileName 文件名，应包含路径
      * @return 若初始化正常完成，返回值为0，否则为其他数值
