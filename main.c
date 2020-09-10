@@ -227,8 +227,6 @@ DWORD WINAPI threadSend(LPVOID lpParamter)
 			}
 		}
 		ReleaseMutex(packMutex);
-
-		printf("here!");
 	}
 	return 0L;
 }
