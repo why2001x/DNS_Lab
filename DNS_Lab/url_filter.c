@@ -5,9 +5,17 @@
 #include "url_filter.h"
 
 static RecordTable List;
+static bool Ready = true;
+static time_t FileTime;
+static char LastFileName[65536];
+static HANDLE FilterLock;
 
 int InitURLFilter(const char* const FileName)
 {
+    if (FilterLock == NULL)
+    {
+        FilterLock = CreateMutex(NULL, FALSE, NULL);
+    }
     lputs(LOG_INFO, "URLFilter: Initializing...");
     FILE* RulesFile;
     lputs(LOG_DBUG, "URLFilter: Reading the rule file...");
@@ -106,10 +114,21 @@ int InitURLFilter(const char* const FileName)
         }
     }
     lprintf(LOG_INFO, "URLFilter: %d rules read from file.\n", Count);
+#ifdef _MSC_VER
+    int fd = _fileno(RulesFile);
+    struct _stat Buffer;
+    _fstat(fd, &Buffer);
+#else
+#endif
     fclose(RulesFile);
     lputs(LOG_DBUG, "URLFilter: Rule file is closed.");
     RecordTableClear(&List);
     List = Temp;
+    FileTime = Buffer.st_mtime;
+    if (FileName != LastFileName)
+    {
+        strcpy(LastFileName, FileName);
+    }
 #ifdef USE_BRUTE
     RecordCheck(&List, NULL);
 #endif
@@ -138,7 +157,32 @@ static inline void URL2Domain(const char* const URLString, char* const Domain)
     Domain[Length] = '\0';
     return;
 }
-
+static inline void FilterHotFix()
+{
+    if (*LastFileName == NULL)
+    {
+        return;
+    }
+    if (FilterLock == NULL)
+    {
+        FilterLock = CreateMutex(NULL, FALSE, NULL);
+    }
+    WaitForSingleObject(FilterLock, INFINITE);
+    FILE* File = fopen(LastFileName, "r");
+#ifdef _MSC_VER
+    int fd = _fileno(File);
+    struct _stat Buffer;
+    _fstat(fd, &Buffer);
+#else
+#endif
+    fclose(File);
+    if (FileTime != Buffer.st_mtime)
+    {
+        InitURLFilter(LastFileName);
+    }
+    ReleaseMutex(FilterLock);
+    return;
+}
 int URLCheck(const int Type, const char* const URLString, void* const Dst)
 {
     lputs(LOG_DBUG, "URLFilter: Accepted a URL query.");
@@ -166,6 +210,7 @@ int URLCheck(const int Type, const char* const URLString, void* const Dst)
         return 0;
     }
     URL2Domain(URLString, Key.Domain);
+    FilterHotFix();
     const struct Record* const Result = RecordCheck(&List, &Key);
     free(Key.Domain);
     Key.Domain = NULL;

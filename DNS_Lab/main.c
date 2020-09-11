@@ -12,6 +12,17 @@ int main(int argc, char* argv[])
 {
     SetLogLevel(LOG_INFO);
     srand(time(NULL));
+    InitURLFilter("dnsrelay.txt"); 
+    uchar buf[16] = { 0 };
+    for (int i = 0; i < 10; i++)
+    {
+        printf("%d: %d ", i, URLCheck((enum QueryType)A, "www.zhihu.com", buf));
+        char out[IP_BUF_SIZE];
+        inet_ntop(AF_INET, &buf, out, IP_BUF_SIZE);
+        printf("%s\n", out);
+        Sleep(2000);
+    }
+    return 0;
     int ec = 0;
     for (int i = 0; i < (int)1e2; i++)
     {
@@ -26,7 +37,6 @@ int main(int argc, char* argv[])
     }
 
     puts("");
-    uchar buf[16] = { 0 };
     for (int cnt = 1; cnt <= 5; cnt++)
     {
         //printf("%d: %d ", cnt, URLCheck((enum QueryType)A, "www.zhihu.com", buf));
