@@ -43,3 +43,10 @@ uint16_t CRC16(const char* Buffer, int Len)
     }
     return CRC;
 }
+uint16_t CRC16Append(uint16_t* const pCRC, const char Src)
+{
+#define CRC (*pCRC)
+    CRC = (CRC << 8) ^ CRC16Tab[((CRC >> 8) ^ Src) & 0x00FF];
+    return CRC;
+#undef CRC
+}

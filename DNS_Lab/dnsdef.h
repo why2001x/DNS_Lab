@@ -22,8 +22,7 @@ extern "C"
     typedef unsigned char uchar;
 #endif
 
-    /// 小端法表示IPv4
-    typedef unsigned ipv4_t;
+    typedef struct in_addr ipv4_t;
     extern int ipv4Comp(ipv4_t Lhs, ipv4_t Rhs);
 
     typedef struct in6_addr ipv6_t;
