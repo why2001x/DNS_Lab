@@ -43,14 +43,14 @@ extern "C" {
 
 	typedef struct dnsHeader {
 		unsigned short ID;
-		unsigned char QR : 1;
-		unsigned char Opcode : 4;
-		unsigned char AA : 1;
-		unsigned char TC : 1;
-		unsigned char RD : 1;
-		unsigned char RA : 1;
-		unsigned char NOP : 3;
-		unsigned char RCODE : 4;
+		unsigned char QR;
+		unsigned char Opcode;
+		unsigned char AA;
+		unsigned char TC;
+		unsigned char RD ;
+		unsigned char RA ;
+		//unsigned char NOP;
+		unsigned char RCODE;
 		unsigned short QDCOUNT;
 		unsigned short ANCOUNT;
 		unsigned short NSCOUNT;
