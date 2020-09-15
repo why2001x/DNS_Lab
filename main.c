@@ -282,8 +282,10 @@ DWORD WINAPI dealPacket(LPVOID lpParamter) /*(char* buf, int packSize, SOCKADDR_
 {
 	//获取参数包
 	parameterPack *tmp = (parameterPack *)lpParamter;
+
 	//获取DNS头信息
 	dnsHeader headInfo = getHeader(tmp->buf);
+
 	//id转换
 	unsigned short outID = 0;
 
