@@ -7,14 +7,16 @@ packet pack[BUFMAX];			 //发送缓冲区
 HANDLE packMutex = NULL;		 //发送缓冲互斥锁
 HANDLE logMutex = NULL;			 //Log互斥锁
 HANDLE idMutex = NULL;			 //ID互斥锁
-unsigned int index = 0;
+unsigned int index = 0;			 //报文序号
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 	//获取命令行参数，设定调试输出等级
 	argRes(argc, argv);
+
 	//初始化host文件
 	InitURLFilter(host);
+
 	//初始化socket
 	SOCKET sock;
 	initSocket(&sock);
@@ -22,6 +24,7 @@ int main(int argc, char* argv[])
 	//初始化pack数组为空闲状态
 	for (int i = 0; i < BUFMAX; i++)
 		pack[i].type = 0;
+
 	//初始化idMap数组为空闲状态
 	for (int i = 0; i < IDMAX; i++)
 		idMap[i].flag = 0;
@@ -40,16 +43,16 @@ int main(int argc, char* argv[])
 	while (1)
 	{
 		//打包接收线程所需参数
-		parameterPack* tmp = (parameterPack*)malloc(sizeof(parameterPack));
+		parameterPack *tmp = (parameterPack *)malloc(sizeof(parameterPack));
 		tmp->sock = sock;
 
 		//动态申请缓冲区空间
-		tmp->buf = (char*)malloc(sizeof(char) * DNSBUFMAX);
+		tmp->buf = (char *)malloc(sizeof(char) * DNSBUFMAX);
 		memset(tmp->buf, 0, sizeof(char) * DNSBUFMAX);
 
 		int len = sizeof(SOCKADDR_IN);
 		//接收包内容，存入缓冲区
-		tmp->packSize = recvfrom(sock, tmp->buf, sizeof(char) * DNSBUFMAX, 0, (SOCKADDR*)&tmp->source, &len);
+		tmp->packSize = recvfrom(sock, tmp->buf, sizeof(char) * DNSBUFMAX, 0, (SOCKADDR *)&tmp->source, &len);
 
 		//异常跳过
 		if (tmp->packSize <= 0)
@@ -61,13 +64,13 @@ int main(int argc, char* argv[])
 
 	closesocket(sock);
 	WSACleanup();
+
 	return 0;
 }
-//获取命令行参数
-void argRes(int argc, char* argv[])
+
+void argRes(int argc, char *argv[])
 {
 	int ch;
-	//verbose normal server filename
 	while ((ch = getopt(argc, argv, "dDs:f:")) != -1)
 	{
 		switch (ch)
@@ -104,8 +107,8 @@ void argRes(int argc, char* argv[])
 		}
 	}
 }
-//初始化socket
-void initSocket(SOCKET* sock)
+
+void initSocket(SOCKET *sock)
 {
 	//初始化WSA
 	WSADATA WSA;
@@ -132,11 +135,13 @@ void initSocket(SOCKET* sock)
 	SOCKADDR_IN serverAddr;
 	memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
+
 	//转为网络字节序
 	serverAddr.sin_port = htons(PORT);
+
 	//监听地址，绑定为0.0.0.0，并字节序转换
 	inet_pton(AF_INET, "0.0.0.0", &serverAddr.sin_addr.S_un.S_addr);
-	if (bind(*sock, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+	if (bind(*sock, (SOCKADDR *)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
 	{
 		printf("Binding socket failed!\n");
 		exit(1);
@@ -146,8 +151,8 @@ void initSocket(SOCKET* sock)
 
 	return;
 }
-//获取DNS报头
-dnsHeader getHeader(char* buf)
+
+dnsHeader getHeader(char *buf)
 {
 	dnsHeader ret;
 	ret.ID = (((unsigned short)(unsigned char)buf[0]) << 8) + (unsigned short)(unsigned char)buf[1];
@@ -164,11 +169,12 @@ dnsHeader getHeader(char* buf)
 	ret.ARCOUNT = (((unsigned short)(unsigned char)buf[10]) >> 8) + (unsigned short)(unsigned char)buf[11];
 	return ret;
 }
-//内外ID转换
-unsigned short encodeID(SOCKADDR_IN src, char* buf)
+
+unsigned short encodeID(SOCKADDR_IN src, char *buf)
 {
 	//等待互斥锁，防止映射同时发生造成ID复用
 	WaitForSingleObject(idMutex, INFINITE);
+
 	for (int i = 1; i < IDMAX; ++i)
 	{
 		//遍历可用的ID
@@ -177,26 +183,31 @@ unsigned short encodeID(SOCKADDR_IN src, char* buf)
 
 		//找到可用的IDMapping
 		idMap[i].flag = 1;
+
 		//存下源地址
 		idMap[i].procInfo = src;
+
 		//存下原ID
 		idMap[i].buf0 = buf[0];
 		idMap[i].buf1 = buf[1];
+
 		//返回可用的ID映射下标，该下标即是用于向上游发出的Transaction ID
 		return i;
 	}
+
 	ReleaseMutex(idMutex);
+
 	return 0;
 }
-//成包，返回包长
-int makePack(char* buf, int size, char* ip)
+
+int makePack(char *buf, int size, char *ip)
 {
-	//1000 0001:QR=1/RA=1
-	buf[2] = 0x81; //response
+	//1000 0001:QR=1/RA=1，response
+	buf[2] = 0x81;
+
 	//查到的ip结果全为0：则block该地址
-	if ((ip[3] | ip[2] | ip[1] | ip[0]) == 0) //block
-		//RCode=3，返回NX_Domian错误
-		buf[3] = 0x83;
+	if ((ip[3] | ip[2] | ip[1] | ip[0]) == 0)
+		buf[3] = 0x83; //RCode=3，返回NX_Domian错误
 	else
 		buf[3] = 0x80;
 
@@ -234,10 +245,10 @@ int makePack(char* buf, int size, char* ip)
 
 	return size + 16;
 }
-//发送线程函数（单独）
+
 DWORD WINAPI threadSend(LPVOID lpParamter)
 {
-	SOCKET* sock = (SOCKET*)lpParamter;
+	SOCKET *sock = (SOCKET *)lpParamter;
 	//发送游标
 	int cur = 0;
 
@@ -253,7 +264,7 @@ DWORD WINAPI threadSend(LPVOID lpParamter)
 				continue;
 			cur = (cur + i) % BUFMAX;
 			pack[cur].type = 0;
-			if (sendto(*sock, pack[cur].buf, pack[cur].size, 0, (SOCKADDR*)&pack[cur].dest, sizeof(SOCKADDR)) == -1)
+			if (sendto(*sock, pack[cur].buf, pack[cur].size, 0, (SOCKADDR *)&pack[cur].dest, sizeof(SOCKADDR)) == -1)
 			{
 				printf("Sending error!\n");
 				break;
@@ -266,11 +277,11 @@ DWORD WINAPI threadSend(LPVOID lpParamter)
 	}
 	return 0L;
 }
-//处理报文，准备发送
+
 DWORD WINAPI dealPacket(LPVOID lpParamter) /*(char* buf, int packSize, SOCKADDR_IN source, SOCKET sock)*/
 {
 	//获取参数包
-	parameterPack* tmp = (parameterPack*)lpParamter;
+	parameterPack *tmp = (parameterPack *)lpParamter;
 	//获取DNS头信息
 	dnsHeader headInfo = getHeader(tmp->buf);
 	//id转换
@@ -283,7 +294,7 @@ DWORD WINAPI dealPacket(LPVOID lpParamter) /*(char* buf, int packSize, SOCKADDR_
 	if (headInfo.QR == 0) // 查询报文
 	{
 		//取出域名
-		char name[DNSBUFMAX] = { 0 };
+		char name[DNSBUFMAX] = {0};
 		int type = 1;
 		for (int i = 12; i < tmp->packSize;)
 		{
@@ -377,21 +388,21 @@ DWORD WINAPI dealPacket(LPVOID lpParamter) /*(char* buf, int packSize, SOCKADDR_
 		//一级Log输出查询信息
 		//二级Log输出每个收到报文的DNS头，以及ID映射，源和目标地址
 		//输出Log需要请求Log互斥锁，防止多线程同时输出，打乱顺序
-		char srcIP[64] = { 0 };
-		char destIP[64] = { 0 };
+		char srcIP[64] = {0};
+		char destIP[64] = {0};
 		inet_ntop(AF_INET, &tmp->source.sin_addr.S_un.S_addr, srcIP, sizeof(char) * 63);
 		inet_ntop(AF_INET, &dest.sin_addr.S_un.S_addr, destIP, sizeof(char) * 63);
 		WaitForSingleObject(logMutex, INFINITE);
 		lprintf(LOG_INFO, "%8d: Type %02d, Name: %s\n", ++index, type, name);
 		lprintf(LOG_DEBUG, "         ID %04x QR %d Opcode %x AA %d TC %d RD %d RA %d RCODE %x\n"
-			"                                    QDCOUNT %d ANCOUNT %d NSCOUNT %d ARCOUNT %d\n"
-			"                                    ID[%5d->%5d] Source %s:%d Destination %s:%d\n",
-			headInfo.ID, headInfo.QR, headInfo.Opcode, headInfo.AA,
-			headInfo.TC, headInfo.RD, headInfo.RA, headInfo.RCODE,
-			headInfo.QDCOUNT, headInfo.ANCOUNT, headInfo.NSCOUNT, headInfo.ARCOUNT,
-			headInfo.ID, outID ? outID : headInfo.ID,
-			srcIP, ntohs(tmp->source.sin_port),
-			destIP, ntohs(dest.sin_port));
+						   "                                    QDCOUNT %d ANCOUNT %d NSCOUNT %d ARCOUNT %d\n"
+						   "                                    ID[%5d->%5d] Source %s:%d Destination %s:%d\n",
+				headInfo.ID, headInfo.QR, headInfo.Opcode, headInfo.AA,
+				headInfo.TC, headInfo.RD, headInfo.RA, headInfo.RCODE,
+				headInfo.QDCOUNT, headInfo.ANCOUNT, headInfo.NSCOUNT, headInfo.ARCOUNT,
+				headInfo.ID, outID ? outID : headInfo.ID,
+				srcIP, ntohs(tmp->source.sin_port),
+				destIP, ntohs(dest.sin_port));
 		ReleaseMutex(logMutex);
 	}
 	else //响应报文
@@ -431,20 +442,20 @@ DWORD WINAPI dealPacket(LPVOID lpParamter) /*(char* buf, int packSize, SOCKADDR_
 			ReleaseMutex(packMutex);
 
 			//应答包仅输出二级Log内容
-			char srcIP[64] = { 0 };
-			char destIP[64] = { 0 };
+			char srcIP[64] = {0};
+			char destIP[64] = {0};
 			inet_ntop(AF_INET, &tmp->source.sin_addr.S_un.S_addr, srcIP, sizeof(char) * 63);
 			inet_ntop(AF_INET, &idMap[outID].procInfo.sin_addr.S_un.S_addr, destIP, sizeof(char) * 63);
 			WaitForSingleObject(logMutex, INFINITE);
 			lprintf(LOG_DEBUG, "%7d: ID %04x QR %d Opcode %x AA %d TC %d RD %d RA %d RCODE %x\n"
-				"                                    QDCOUNT %d ANCOUNT %d NSCOUNT %d ARCOUNT %d\n"
-				"                                    ID[%5d->%5d] Source %s:%d Destination %s:%d\n",
-				++index, headInfo.ID, headInfo.QR, headInfo.Opcode, headInfo.AA,
-				headInfo.TC, headInfo.RD, headInfo.RA, headInfo.RCODE,
-				headInfo.QDCOUNT, headInfo.ANCOUNT, headInfo.NSCOUNT, headInfo.ARCOUNT,
-				headInfo.ID, (((unsigned short)(unsigned char)idMap[outID].buf0) << 8) + (unsigned short)(unsigned char)idMap[outID].buf1,
-				srcIP, ntohs(tmp->source.sin_port),
-				destIP, ntohs(idMap[outID].procInfo.sin_port));
+							   "                                    QDCOUNT %d ANCOUNT %d NSCOUNT %d ARCOUNT %d\n"
+							   "                                    ID[%5d->%5d] Source %s:%d Destination %s:%d\n",
+					++index, headInfo.ID, headInfo.QR, headInfo.Opcode, headInfo.AA,
+					headInfo.TC, headInfo.RD, headInfo.RA, headInfo.RCODE,
+					headInfo.QDCOUNT, headInfo.ANCOUNT, headInfo.NSCOUNT, headInfo.ARCOUNT,
+					headInfo.ID, (((unsigned short)(unsigned char)idMap[outID].buf0) << 8) + (unsigned short)(unsigned char)idMap[outID].buf1,
+					srcIP, ntohs(tmp->source.sin_port),
+					destIP, ntohs(idMap[outID].procInfo.sin_port));
 			ReleaseMutex(logMutex);
 		}
 	}
