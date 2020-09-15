@@ -40,10 +40,6 @@ void BruteTableClear(struct BruteTable* const Object)
 #define STEP_BT_MAX 2048
 int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
 {
-#ifdef _THR_XTHREADS_H
-
-#else
-#endif
     /// 判断表内空间是否已满
     if (Object->Data + Object->Size == Object->End)
     {
@@ -82,9 +78,6 @@ int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
     *(Object->End) = Item;
     Object->End++;
     lputs(LOG_DBUG, "BruteTable: A Record add to the end of BruteTable.");
-#ifdef _THR_XTHREADS_H
-#else
-#endif
     return 0;
 }
 #undef MAX_SIZE

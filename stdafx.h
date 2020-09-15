@@ -26,7 +26,10 @@ extern "C"
 
 #include "getopt.h"
 
-#if defined(_MSC_VER) or defined(_WIN32)
+#if (defined(_MSC_VER) || defined(_WIN32))
+
+#include <sys/stat.h>
+
 #include "WinSock2.h"
 #include "Ws2tcpip.h"
 #include "Windows.h"

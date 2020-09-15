@@ -1,4 +1,4 @@
-﻿/**
+﻿﻿/**
  *  @brief     DNS报文头
  *  @details   此
  *  @author    方淇
@@ -10,7 +10,7 @@
 #define _DNSHEADER_H
 
 #ifdef __cplusplus
-extern "C" {
+	extern "C" {
 #endif
 
 	//ID
@@ -47,8 +47,8 @@ extern "C" {
 		unsigned char Opcode;
 		unsigned char AA;
 		unsigned char TC;
-		unsigned char RD ;
-		unsigned char RA ;
+		unsigned char RD;
+		unsigned char RA;
 		//unsigned char NOP;
 		unsigned char RCODE;
 		unsigned short QDCOUNT;
