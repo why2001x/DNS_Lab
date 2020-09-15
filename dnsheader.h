@@ -1,4 +1,4 @@
-﻿﻿/**
+﻿/**
  *  @brief     DNS报文头
  *  @details   此
  *  @author    方淇
@@ -10,7 +10,7 @@
 #define _DNSHEADER_H
 
 #ifdef __cplusplus
-	extern "C" {
+extern "C" {
 #endif
 
 	//ID
