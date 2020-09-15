@@ -63,10 +63,10 @@ extern "C"
      *
      * @warning 宽字符文件名未经测试，新建文件可能会导致文件路径存在乱码
      *
-     * @param FileName 文件名，应包含路径
+     * @param Dst 输出流
      * @return 若初始化正常完成，返回值为0，否则为其他数值
      */
-    extern int InitLog(const char FileName[]);
+    extern int InitLog(FILE* Dst);
 
     /**
      * @brief 更改日志等级

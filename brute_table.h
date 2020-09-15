@@ -78,4 +78,4 @@ extern "C"
 }
 #endif
 
-#endif // _URL_FILTER_H
+#endif // _BRUTE_TABLE_H

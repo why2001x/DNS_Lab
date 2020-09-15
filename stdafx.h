@@ -19,6 +19,7 @@ extern "C"
 #include "stdarg.h"
 #include "stdbool.h"
 #include "stdio.h"
+#include "stdint.h"
 #include "stdlib.h"
 #include "string.h"
 #include "time.h"
@@ -30,7 +31,10 @@ extern "C"
 
 #include "getopt.h"
 
-#if defined(_MSC_VER) or defined(_WIN32)
+#if (defined(_MSC_VER) || defined(_WIN32))
+
+#include <sys/stat.h>
+
 #include "WinSock2.h"
 #include "Ws2tcpip.h"
 #include "Windows.h"

@@ -4,21 +4,22 @@
 
 #ifndef NO_LOG_SERVICE
 
+static HANDLE LogLock;
+
 static FILE* LogFile;
 
-static int LogLevel = LOG_WARN;
+static int LogLevel = LOG_OFF;
 
 static bool Ready;
 
-int InitLog(const char FileName[])
+int InitLog(FILE* Dst)
 {
-    static const char Default[] = "./log.txt";
-    if (!FileName || !(*FileName))
+    if (Dst == NULL)
     {
-        fputs("Using the default log file.\n", stderr);
-        FileName = Default;
+        fputs("Using stderr for log.\n", stderr);
+        Dst = stderr;
     }
-    if (LogFile)
+    if (LogFile && LogFile != stderr)
     {
         fputs("Try to restart the log service.\n", stderr);
         switch (fclose(LogFile))
@@ -38,11 +39,7 @@ int InitLog(const char FileName[])
             return 1;
         }
     }
-    if ((LogFile = fopen(FileName, "a")) == NULL)
-    {
-        fputs("Unable to open the specified LogFile!\n", stderr);
-        return 1;
-    }
+    LogFile = stderr;
     Ready = true;
     return 0;
 }
@@ -55,6 +52,11 @@ void SetLogLevel(const int DstLevel)
 
 static int LogNotReady(void)
 {
+    if (LogLock == NULL)
+    {
+        LogLock = CreateMutex(NULL, FALSE, NULL);
+    }
+    WaitForSingleObject(LogLock, INFINITE);
     if (Ready)
     {
         return 0;
@@ -62,6 +64,7 @@ static int LogNotReady(void)
     if (InitLog(NULL))
     {
         fputs("Start the log service failed.\n", stderr);
+        ReleaseMutex(LogLock);
         return 1;
     }
     return 0;
@@ -100,10 +103,12 @@ int lprintf(const int WLevel, char const* const Format, ...)
     }
     if (lprefix(WLevel))
     {
+        ReleaseMutex(LogLock);
         return EOF;
     }
     int ret = vfprintf(LogFile, Format, ArgList);
     fflush(LogFile);
+    ReleaseMutex(LogLock);
     return ret;
 }
 
@@ -119,18 +124,22 @@ int lputs(const int WLevel, char const* const Buffer)
     }
     if (lprefix(WLevel))
     {
+        ReleaseMutex(LogLock);
         return EOF;
     }
     int ret = fputs(Buffer, LogFile);
     if (ret < 0)
     {
+        ReleaseMutex(LogLock);
         return ret;
     }
     if (fputc('\n', LogFile))
     {
         fflush(LogFile);
+        ReleaseMutex(LogLock);
         return 0;
     }
+    ReleaseMutex(LogLock);
     return EOF;
 }
 
