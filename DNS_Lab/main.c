@@ -46,7 +46,6 @@ int main(int argc, char* argv[])
         printf("%s\n", out);
     }
     return 0;
-    printf("%lld\n", sizeof(struct header));
     printf("%d\n", lprintf(LOG_WARN, "Test\n", 1234, ' ', 98.76));
     printf("%d\n", lprintf(LOG_INFO, "%d%c%lf\n", 1234, ' ', 98.76));
     Sleep(2000);

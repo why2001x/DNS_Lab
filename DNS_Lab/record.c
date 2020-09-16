@@ -9,14 +9,14 @@ const union RecordData RECORD_DATA_MAX = { .IPv6.u.Word = {-1,-1,-1,-1,-1,-1,-1,
 int RecordSortComp(void* LPtr, void* RPtr)
 {
     struct Record Lhs = **(struct Record**)LPtr, Rhs = **(struct Record**)RPtr;
+    if (Lhs.Type != Rhs.Type)
+    {
+        return (Lhs.Type > Rhs.Type) - (Lhs.Type < Rhs.Type);
+    }
     int Comp = strcmp(Lhs.Domain, Rhs.Domain);
     if (Comp)
     {
         return Comp;
-    }
-    if (Lhs.Type != Rhs.Type)
-    {
-        return (Lhs.Type > Rhs.Type) - (Lhs.Type < Rhs.Type);
     }
     switch ((enum QueryType)Lhs.Type)
     {
@@ -31,14 +31,14 @@ int RecordSortComp(void* LPtr, void* RPtr)
 int RecordFindComp(void* KeyPtr, void* ParPtr)
 {
     struct Record Key = **(struct Record**)KeyPtr, Par = **(struct Record**)ParPtr;
+    if (Key.Type != Par.Type)
+    {
+        return (Key.Type > Par.Type) - (Key.Type < Par.Type);
+    }
     int Comp = strcmp(Key.Domain, Par.Domain);
     if (Comp)
     {
         return Comp;
-    }
-    if (Key.Type != Par.Type)
-    {
-        return (Key.Type > Par.Type) - (Key.Type < Par.Type);
     }
     switch ((enum QueryType)Key.Type)
     {
@@ -62,12 +62,11 @@ int RecordFindComp(void* KeyPtr, void* ParPtr)
 int RecordFindCompU(void* KeyPtr, void* ParPtr)
 {
     struct Record Key = **(struct Record**)KeyPtr, Par = **(struct Record**)ParPtr;
-    int Comp = strcmp(Key.Domain, Par.Domain);
-    if (Comp)
+    if (Key.Type != Par.Type)
     {
-        return Comp;
+        return (Key.Type > Par.Type) - (Key.Type < Par.Type);
     }
-    return (Key.Type > Par.Type) - (Key.Type < Par.Type);
+    return strcmp(Key.Domain, Par.Domain);
 }
 
 int RecordNodeInit(struct Record* const Object, const uchar Type, const union RecordData Data, const char* const Domain)
