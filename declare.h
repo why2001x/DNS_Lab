@@ -19,26 +19,27 @@
 typedef struct packet
 {
     int type; //0空闲，1占用
-    int size;
-    char buf[512];
-    struct sockaddr_in dest;
+    int size;//报文长度
+    char buf[512];//报文内容
+    struct sockaddr_in dest;//目的地址
 } packet;
 
 //id映射源信息
 typedef struct srcInfo
 {
-    int flag;
-    char buf0, buf1;
-    struct sockaddr_in procInfo;
+    int flag;//0空闲，1占用
+    char buf0, buf1;//ID字段
+    SOCKADDR_IN procInfo;//源地址
+    time_t start;//id映射时间
 } srcInfo;
 
 //处理线程参数包
 typedef struct parameterPack
 {
-    char *buf;
-    int packSize;
-    SOCKADDR_IN source;
-    SOCKET sock;
+    char *buf;//报文内容
+    int packSize;//报文长度
+    SOCKADDR_IN source;//源地址
+    SOCKET sock;//发送套接字
 } parameterPack;
 
 //命令行参数处理
