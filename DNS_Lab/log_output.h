@@ -2,7 +2,7 @@
  *  @brief     日志服务
  *  @details   可将日志分级输出至屏幕或文件
  *  @author    王海昱
- *  @version   0.0.1d
+ *  @version   0.0.2
  *  @date      2020.07.24-2020.08.10
  *  @warning   日志服务自身错误将仅输出至stderr
  *  @warning   宽字符未经测试
@@ -73,6 +73,12 @@ extern "C"
      * @param DstLevel 目标日志等级
      */
     extern void SetLogLevel(const int DstLevel);
+
+    /**
+     * @brief 获取日志等级
+     * @return 当前日志等级
+     */
+    extern int GetLogLevel();
 
     /**
      * @brief 日志服务-格式化输出

@@ -49,6 +49,10 @@ void SetLogLevel(const int DstLevel)
     LogLevel = DstLevel;
     return;
 }
+int GetLogLevel()
+{
+    return LogLevel;
+}
 
 static int LogNotReady(void)
 {

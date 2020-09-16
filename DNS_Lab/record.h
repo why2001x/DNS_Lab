@@ -89,6 +89,13 @@ extern "C"
      */
     void RecordNodeFree(struct Record* const Object);
 
+    /**
+     * @brief 输出记录到字符串
+     * @param Object 输出记录指针
+     * @param Dst 目标字符串
+     */
+    void sprintRecord(const struct Record* const Object, char* const Dst);
+
     /**@}*/
 
 #ifdef __cplusplus

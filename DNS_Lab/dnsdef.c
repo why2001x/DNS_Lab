@@ -35,4 +35,22 @@ int ipv6Comp(ipv6_t Lhs, ipv6_t Rhs)
     }
     return 0;
 }
+const char* QueryTypeString(enum QueryType Type)
+{
+    switch (Type)
+    {
+    case A:     return "A";
+    case NS:    return "NS";
+    case CNAME: return "CNAME";
+    case SOA:   return "SOA";
+    case WKS:   return "WKS";
+    case PTR:   return "PTR";
+    case HINFO: return "HINFO";
+    case MX:    return "MX";
+    case AAAA:  return "AAAA";
+    case AXFR:  return "AXFR";
+    case ANY:   return "ANY";
+    default:    return NULL;
+    }
+}
 #endif // _MSC_VER

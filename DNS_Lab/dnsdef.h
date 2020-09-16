@@ -44,6 +44,13 @@ extern "C"
         ANY = 255,  ///< 对所有记录的请求
     };
 
+    /**
+     * @brief 查询类型对应字符串
+     * @param Type 查询类型
+     * @return 类型对应字符串
+     */
+    extern const char* QueryTypeString(enum QueryType Type);
+
 #ifdef __cplusplus
 }
 #endif

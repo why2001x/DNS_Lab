@@ -10,7 +10,7 @@
 #include "url_filter.h"
 int main(int argc, char* argv[])
 {
-    SetLogLevel(LOG_INFO);
+    SetLogLevel(LOG_DEBUG);
     srand(time(NULL));
     InitURLFilter("dnsrelay.txt"); 
     uchar buf[16] = { 0 };

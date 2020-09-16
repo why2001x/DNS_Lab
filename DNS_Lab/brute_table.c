@@ -9,7 +9,7 @@ static void BruteTableReset(struct BruteTable* const Object)
     {
         return;
     }
-    lputs(LOG_DBUG, "BruteTable: Resetting a BruteTable.");
+    lprintf(LOG_DBUG, "BruteTable: Resetting a BruteTable at 0x%p.\n", Object);
     /// 释放记录指针数组内存空间
     free(Object->Data);
     /// 初始化基本记录表
@@ -25,7 +25,7 @@ void BruteTableClear(struct BruteTable* const Object)
     {
         return;
     }
-    lputs(LOG_DBUG, "BruteTable: Cleaning a BruteTable.");
+    lprintf(LOG_DBUG, "BruteTable: Cleaning a BruteTable at 0x%p.\n", Object);
     for (int i = 0; i < Object->Size; i++)
     {
         RecordNodeFree(Object->Data[i]);
@@ -43,7 +43,7 @@ int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
     /// 判断表内空间是否已满
     if (Object->Data + Object->Size == Object->End)
     {
-        lputs(LOG_DBUG, "BruteTable: Expanding the BruteTable.");
+        lprintf(LOG_DBUG, "BruteTable: Expanding the BruteTable at 0x%p.\n", Object);
         /// 判断表记录数是否到达约定上限
         if (Object->Size >= MAX_SIZE)
         {
@@ -77,7 +77,12 @@ int BruteTableAppend(struct BruteTable* const Object, struct Record* const Item)
     Object->Ready = false;
     *(Object->End) = Item;
     Object->End++;
-    lputs(LOG_DBUG, "BruteTable: A Record add to the end of BruteTable.");
+    if (LOG_DEBUG <= GetLogLevel())
+    {
+        char Buf[512];
+        sprintRecord(Item, Buf);
+        lprintf(LOG_DBUG, "BruteTable: %s add to the end of BruteTable.\n", Buf);
+    }
     return 0;
 }
 #undef MAX_SIZE
